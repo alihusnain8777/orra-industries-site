@@ -1,8 +1,0 @@
-{
-  "name": "orra-industries-site",
-  "version": "1.0.0",
-  "private": true,
-  "description": "ASA Industries website with admin and buyer panels",
-  "scripts": { "dev": "node dev-server.js" },
-  "engines": { "node": ">=18" }
-}
