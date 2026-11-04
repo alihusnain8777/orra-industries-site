@@ -1,3 +1,8 @@
 {
-  "rewrites": [{ "source": "/:path*", "destination": "/api/render?p=/:path*" }]
+  "buildCommand": "",
+  "outputDirectory": "public",
+  "routes": [
+    { "handle": "filesystem" },
+    { "src": "/(.*)", "dest": "/api/render?p=/$1" }
+  ]
 }
