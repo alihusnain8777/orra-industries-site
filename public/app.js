@@ -94,7 +94,7 @@ const TESTI=[
 const SEED={
  v:3,
  settings:{company:"ORRA Industries",tagline:"Built for performance",email:"mrabid320@gmail.com",phone:"+92 340 0420528",whatsapp:"+92 340 0420528",address:"Sialkot, Punjab, Pakistan",hours:"",instagram:"https://www.instagram.com/orra_apperal_international",facebook:"",linkedin:"",scci:"",ntn:"",since:"",metaTitle:"Custom Sportswear & Teamwear Manufacturer | ORRA Industries",metaDesc:"ORRA Industries manufactures custom sportswear, teamwear and private-label apparel in Pakistan. MOQ 50 pieces, samples in 7–10 working days.",showPrices:false,maintenance:false},
- content:{heroTitle:"Built for teams. Manufactured for brands.",heroSub:"Custom sportswear, teamwear and private-label apparel made in Sialkot, Pakistan for clubs, academies and brands in 8 export markets.",heroImage:"",ticker:"MOQ 50 pieces per design · Samples in 7–10 working days · Bulk in 27–30 working days · Shipping worldwide from Sialkot",aboutText:"ORRA Industries is a manufacturing partner, not a generic supplier. We produce sportswear, teamwear and private-label apparel for clubs, academies, schools and brands across Europe, North America, the Middle East and Oceania.",ctaTitle:"Ready to start your production brief?",statFactory:"",statStaff:"",statCapacity:""},
+ content:{heroTitle:"Built for teams. Manufactured for brands.",heroSub:"Custom sportswear, teamwear and private-label apparel made in Sialkot, Pakistan for clubs, academies and brands in 8 export markets.",heroImage:"",heroVideo:"",qcImages:[],ticker:"MOQ 50 pieces per design · Samples in 7–10 working days · Bulk in 27–30 working days · Shipping worldwide from Sialkot",aboutText:"ORRA Industries is a manufacturing partner, not a generic supplier. We produce sportswear, teamwear and private-label apparel for clubs, academies, schools and brands across Europe, North America, the Middle East and Oceania.",ctaTitle:"Ready to start your production brief?",statFactory:"",statStaff:"",statCapacity:""},
  categories:CATS,
  products:SEED_PRODUCTS,
  posts:POSTS,
@@ -146,32 +146,42 @@ function toast(msg){const t=document.createElement("div");t.className="toast";t.
 
 /* ============ layout ============ */
 function header(){
-  const n=[["shop","Shop"],["private-label","Private Label"],["manufacturing","Manufacturing"],["markets","Markets"],["about","About"],["blog","Knowledge Center"],["contact","Contact"]];
+  const n=[["home","Home"],["shop","Shop"],["private-label","Private Label"],["manufacturing","Manufacturing"],["markets","Global Markets"],["about","About"],["blog","Knowledge Center"],["contact","Contact"]];
   const base=route.split("-")[0];
+  const on=r=>route===r||(r==="shop"&&(base==="shop"||base==="cat"||route.startsWith("product-")))||(r==="blog"&&route.startsWith("post-"));
   return `${session.admin?`<div class="demo-bar"><div class="wrap"><span><b>Staff mode.</b> ${esc(LIVE.status)}</span><span><a data-go="admin">Admin panel</a> · <a data-act="signout">Sign out</a></span></div></div>`:""}
-  <div class="ticker"><span>${esc(S.content.ticker)} · ${esc(S.content.ticker)}</span></div>
-  <header class="site"><div class="wrap">
-   <a class="logo" data-go="home" href="#home"><span class="mark">O</span><span><b>${esc(S.settings.company.toUpperCase())}</b><small>${esc(S.settings.tagline)}</small></span></a>
-   <nav class="main" id="nav">${n.map(([r,l])=>`<a href="#${r}" class="${route===r||(r==="shop"&&(base==="shop"||base==="cat"||route.startsWith("product-")))||(r==="blog"&&route.startsWith("post-"))?"act":""}">${l}</a>`).join("")}</nav>
-   <div class="hdr-actions">
-    <a class="icon-btn" href="#cart"><span class="lbl">RFQ</span> Cart <span class="ct">${S.cart.reduce((a,b)=>a+1,0)}</span></a>
-    <a class="icon-btn" href="#account">${session.user?esc(session.user.name.split(" ")[0]):"Login"}</a>
-    <button class="icon-btn burger" data-act="burger" aria-label="Menu">Menu</button>
-   </div></div></header>`;
+  <div class="topstrip"><span>${esc(S.content.ticker)} · ${esc(S.content.ticker)} · </span></div>
+  <header class="site2">
+   <a class="brand" href="#home"><span class="glyph" aria-hidden="true"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="15" fill="none" stroke="var(--ink)" stroke-width="7"/><path d="M8 30 L30 9" stroke="var(--accent)" stroke-width="4"/></svg></span><span class="bt"><b>${esc(S.settings.company.toUpperCase())}</b><small>${esc(S.settings.tagline)}</small></span></a>
+   <div class="bar">
+    <nav class="main" id="nav">${n.map(([r,l])=>r==="shop"
+      ?`<div class="dd"><a href="#shop" class="${on(r)?"act":""}">${l} <span aria-hidden="true">▾</span></a><div class="ddm">${S.categories.map(c=>`<div class="ddc"><a href="#cat-${c.id}">${esc(c.name)} <span aria-hidden="true">›</span></a><div class="dds">${c.subs.slice(0,8).map(s=>`<a href="#cat-${c.id}">${esc(s)}</a>`).join("")}</div></div>`).join("")}<a href="#shop"><b>All products</b></a></div></div>`
+      :`<a href="#${r}" class="${on(r)?"act":""}">${l}</a>`).join("")}<a href="#account" class="mob-only">${session.user?"My account":"Login"}</a></nav>
+    <div class="hdr-actions">
+     <a class="rfq-pill" href="#cart">RFQ <span class="ct">${S.cart.length}</span></a>
+     <a class="rq-btn" href="#rfq">Request quote</a>
+     <button class="burger" data-act="burger" aria-label="Open menu">Menu</button>
+    </div>
+   </div>
+  </header>`;
 }
 function footer(){
   const s=S.settings;
-  return `<div class="cta-band"><div class="wrap"><h2>${esc(S.content.ctaTitle)}</h2><div style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn pri" href="#rfq">Start your production brief</a><a class="btn" href="#contact">Talk to our team</a></div></div></div>
-  <footer class="site"><div class="wrap"><div class="cols">
-   <div><a class="logo" href="#home" style="color:var(--ink-fg)"><span class="mark">O</span><span><b>${esc(s.company.toUpperCase())}</b><small>${esc(s.tagline)}</small></span></a><p style="margin-top:14px;max-width:280px">Custom sportswear, teamwear and private-label manufacturer. Sialkot, Pakistan${s.since?", since "+esc(s.since):""}.</p></div>
-   <div><h5>Company</h5><a href="#about">About</a><a href="#manufacturing">Manufacturing</a><a href="#private-label">Private Label</a><a href="#markets">Markets</a><a href="#blog">Knowledge Center</a></div>
+  const types=[...new Set(S.products.filter(p=>p.active).map(p=>p.sub))].slice(0,10);
+  return `<section class="f-cta"><div class="wrap"><h2>From product development to custom labels, packaging and bulk export.</h2><a class="pill-btn" href="#rfq">Request quote →</a></div></section>
+  <footer class="site"><div class="wrap"><div class="cols f5">
+   <div><a class="f-brand" href="#home"><span class="glyph" aria-hidden="true"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="15" fill="none" stroke="#fff" stroke-width="7"/><path d="M8 30 L30 9" stroke="var(--accent)" stroke-width="4"/></svg></span><b>${esc(s.company.toUpperCase())}</b></a><p style="margin-top:14px;max-width:280px">${esc(s.company)} is a custom sportswear, teamwear and private-label apparel manufacturer serving international B2B buyers: clubs, academies, schools, brands and distributors.</p><p class="f-tag">Custom apparel manufacturing / ${esc(s.address.split(",")[0])}, Pakistan</p></div>
+   <div><h5>Company</h5><a href="#about">About ${esc(s.company.split(" ")[0])}</a><a href="#manufacturing">Manufacturing</a><a href="#private-label">Private Label</a><a href="#markets">Global Markets</a><a href="#blog">Knowledge Center</a><a href="#contact">Contact</a></div>
    <div><h5>Categories</h5>${S.categories.map(c=>`<a href="#cat-${c.id}">${esc(c.name)}</a>`).join("")}</div>
-   <div><h5>Help</h5><a href="#faq">FAQ</a><a href="#rfq">Request a quote</a><a href="#privacy-policy">Privacy policy</a><a href="#terms">Terms of business</a><a href="#account">Buyer login</a></div>
-   <div><h5>Contact</h5><span style="display:block;user-select:all">${esc(s.email)}</span><span style="display:block;user-select:all">${esc(s.phone)}</span><span style="display:block">${esc(s.address)}</span>${s.hours?`<span style="display:block">${esc(s.hours)}</span>`:""}<span style="display:block;height:8px"></span>${[["instagram","Instagram"],["facebook","Facebook"],["linkedin","LinkedIn"]].filter(x=>s[x[0]]).map(x=>`<a href="${esc(s[x[0]])}" target="_blank" rel="noopener">${x[1]}</a>`).join("")}</div>
-  </div><div class="bot"><span>© 2026 ${esc(s.company)}${s.scci?" · SCCI No. "+esc(s.scci):""}${s.ntn?" · NTN "+esc(s.ntn):""}</span><span>Made in Sialkot, Pakistan</span></div></div></footer>
+   <div><h5>Product types</h5>${types.map(t=>`<a href="#shop">${esc(t)}</a>`).join("")}</div>
+   <div><h5>Production terms</h5><span class="f-line">MOQ 50 pieces</span><span class="f-line">Sampling 7–10 working days</span><span class="f-line">Bulk production 27–30 working days</span><span class="f-line">Private label ready</span><a href="#faq">FAQ</a><a href="#terms">Terms of business</a><a href="#privacy-policy">Privacy policy</a></div>
+  </div>
+  <div class="f-contact"><h5>Contact</h5><span style="user-select:all">✉ ${esc(s.email)}</span><span style="user-select:all">☎ ${esc(s.phone)}</span><span>⌖ ${esc(s.address)}</span>${s.hours?`<span>${esc(s.hours)}</span>`:""}</div>
+  <div class="bot"><span>© 2026 ${esc(s.company)}. All rights reserved.${s.scci?" · SCCI No. "+esc(s.scci):""}${s.ntn?" · NTN "+esc(s.ntn):""}</span><span class="f-soc">${[["instagram","Instagram"],["facebook","Facebook"],["linkedin","LinkedIn"]].filter(x=>s[x[0]]).map(x=>`<a href="${esc(s[x[0]])}" target="_blank" rel="noopener">${x[1]}</a>`).join("")}<a href="https://wa.me/${s.whatsapp.replace(/\D/g,"")}" target="_blank" rel="noopener">WhatsApp</a></span></div></div></footer>
   <a class="wa" href="https://wa.me/${s.whatsapp.replace(/\D/g,"")}" target="_blank" rel="noopener">WhatsApp</a>`;
 }
-function phead(title,sub,crumbs){return `<div class="phead"><div class="wrap">${crumbs?`<div class="crumbs">${crumbs}</div>`:""}<h1>${title}</h1>${sub?`<p>${sub}</p>`:""}</div></div>`}
+const EYEBROW={shop:"Product catalogue — made to order","private-label":"Private label & customisation",manufacturing:"Manufacturing transparency",markets:"Global markets",about:"About the manufacturer",blog:"Knowledge center",contact:"Contact the production team",rfq:"Production brief",cart:"Request for quotation",faq:"Buyer questions","privacy-policy":"Legal",terms:"Legal",account:"Buyer account",admin:"Staff area"};
+function phead(title,sub,crumbs){const eb=EYEBROW[route]||(route.startsWith("cat-")?"Product family":route.startsWith("post-")?"Buyer guide":"");return `<div class="phead"><div class="wrap">${crumbs?`<div class="crumbs">${crumbs}</div>`:""}${eb?`<div class="dot-eyebrow">${eb}</div>`:""}<h1>${title}</h1>${sub?`<p>${sub}</p>`:""}</div></div>`}
 
 /* ============ public pages ============ */
 function prodCard(p){
@@ -185,39 +195,61 @@ function prodCard(p){
 const isWished=id=>{const u=curUser();return u&&u.wishlist.includes(id)};
 const curUser=()=>session.user&&S.users.find(u=>u.id===session.user.id);
 
+const QCSTEPS=[["Material Inspection","Fabric, trims and colour direction are reviewed before production moves forward."],["Construction Checks","Panels, seams, structure and build details are checked against the approved brief."],["Stitching Checks","Stitching consistency, alignment and finishing quality are reviewed during production."],["Print / Embroidery Inspection","Decoration placement, colour, density and finish are checked against the artwork."],["Measurement Checks","Sizing and grading are measured against your size specification."],["Final Garment Review","Every finished piece is checked for defects, loose threads and cleanliness."],["Packing Audit","Labels, folding, polybags and carton counts are verified before export."]];
+const FLAG=cc=>cc.toUpperCase().replace(/./g,ch=>String.fromCodePoint(127397+ch.charCodeAt(0)));
+function qcVisual(i){const c=S.content,im=(c.qcImages||[])[i];return im?`<img src="${esc(im)}" alt="">`:`<div class="qc-ph"><img src="${garment(["jersey","jacket","hoodie","polo","vest","tracksuit","pack"][i%7],"#2a2a28","#F26A1B",["front","close","side","front","back","front","front"][i%7])}" alt=""></div>`}
 function pgHome(){
-  const c=S.content, feat=S.products.filter(p=>p.featured&&p.active).slice(0,4);
+  const c=S.content, s=S.settings, feat=S.products.filter(p=>p.featured&&p.active).slice(0,4);
   const kits=[S.products[0],S.products.find(p=>p.type==="hoodie"),S.products.find(p=>p.type==="puffer")].filter(Boolean);
-  const words=c.heroTitle.split(" "); const half=Math.ceil(words.length/2);
-  return `<section class="hero"><div class="wrap"><div class="hero-grid"><div>
-   <div class="eyebrow">Sialkot · ${S.settings.since?"Since "+esc(S.settings.since)+" · ":""}Export manufacturer</div>
-   <h1 style="margin-top:14px">${esc(words.slice(0,half).join(" "))} <em>${esc(words.slice(half).join(" "))}</em></h1>
-   <p class="lead">${esc(c.heroSub)}</p>
-   <div class="ctas on-ink"><a class="btn pri" href="#rfq">Start your production brief</a><a class="btn" href="#shop">Explore products</a></div></div>
-   <div class="hero-art">${c.heroImage?`<img class="big" src="${c.heroImage}" alt="ORRA production">`:kits.map(k=>`<div class="kit"><img src="${pimg(k)}" alt="${esc(k.name)}"></div>`).join("")}</div></div></div>
-   <div class="wrap"><div class="cred">${S.settings.since?`<div><b>${esc(S.settings.since)}</b><span>Established, Sialkot</span></div>`:`<div><b>8</b><span>Export markets</span></div>`}<div><b>50 pcs</b><span>MOQ per design / colour</span></div><div><b>7–10 days</b><span>Sample lead time</span></div><div><b>27–30 days</b><span>Bulk production</span></div></div></div></section>
+  const words=c.heroTitle.split(/(?<=\.)\s+/); 
+  const media=c.heroVideo
+    ?`<video class="hv-media" src="${esc(c.heroVideo)}" ${c.heroImage?`poster="${esc(c.heroImage)}"`:""} autoplay muted loop playsinline preload="metadata"></video><button class="hv-sound" data-act="hvsound" aria-label="Turn sound on">🔇 Sound</button>`
+    :c.heroImage?`<img class="hv-media" src="${esc(c.heroImage)}" alt="">`
+    :`<div class="hv-media hv-kits">${kits.map(k=>`<img src="${pimg(k)}" alt="">`).join("")}</div>`;
+  const tw=S.products.find(p=>p.cat==="teamwear"&&p.active)||S.products[0];
+  const qi=ui.qc||0;
+  return `<section class="h-video">${media}</section>
 
-  <section><div class="wrap"><div class="sec-head"><h2>Six product families</h2><p>Everything a club, academy or apparel brand needs, made under one roof with one quality standard.</p></div>
-   <div class="grid g3">${S.categories.map((k,i)=>`<a class="cat-card" href="#cat-${k.id}"><span class="num">0${i+1}</span><div class="img"><img src="${catImg(k)}" alt="${esc(k.name)}" loading="lazy"></div><div class="body"><h3>${esc(k.name)}</h3><p class="muted" style="font-size:14px">${esc(k.blurb)}</p><span class="mono" style="margin-top:auto;color:var(--accent)">${S.products.filter(p=>p.cat===k.id&&p.active).length} products →</span></div></a>`).join("")}</div></div></section>
+  <section class="h-intro"><div class="wrap">
+   <div class="dot-eyebrow">Sialkot, Pakistan — International apparel manufacturing</div>
+   ${s.since?`<span class="cred-chip"><b>Since ${esc(s.since)}</b> · Manufacturing credentials</span>`:`<span class="cred-chip"><b>Export ready</b> · Manufacturing credentials</span>`}
+   <h1 class="h-display">${words.map((w,i)=>i===1?`<em>${esc(w)}</em>`:esc(w)).join("<br>")}</h1>
+   <div class="h-tag">Sampling 7–10 working days</div>
+   <div class="h-stats"><div><span>MOQ</span><b>50<small>pcs</small></b><i>Minimum pieces</i></div><div><span>Sample time</span><b>7–10<small>days</small></b><i>Working days</i></div><div><span>Bulk time</span><b>27–30<small>days</small></b><i>Working days</i></div></div>
+   <p class="h-lead">${esc(c.heroSub)}</p>
+   <div class="h-ctas"><a class="pill-btn" href="#rfq">Start your production brief →</a><a class="text-btn" href="#shop">Explore products →</a></div>
+  </div></section>
 
-  <section style="background:var(--sunk)"><div class="wrap"><div class="sec-head"><h2>Featured products</h2><a class="btn" href="#shop">View full catalogue</a></div>
-   <div class="grid g4">${feat.map(prodCard).join("")}</div></div></section>
+  <section class="h-fam"><div class="wrap"><div class="h-head"><div><div class="dot-eyebrow">Product families</div><h2 class="h-h2">One manufacturer. Six connected apparel ranges.</h2><p class="h-sub">A clean B2B catalogue for buyers building coordinated sportswear, teamwear and private-label collections.</p></div><div class="h-side">Performance product architecture / built around your brand</div></div></div>
+   <div class="fam-track">${S.categories.map((k,i)=>`<a class="fam-card" href="#cat-${k.id}"><span class="fam-no">0${i+1}</span><img src="${catImg(k)}" alt="" loading="lazy"><div class="fam-body"><h3>${esc(k.name)}</h3><p>${esc(k.blurb)}</p><span>Explore category ↗</span></div></a>`).join("")}</div>
+  </section>
 
-  <section class="band"><div class="wrap"><div class="sec-head"><h2>From brief to export in 10 steps</h2><a class="btn" href="#manufacturing" style="border-color:var(--ink-fg)">See the process</a></div>
-   <div class="steps">${STEPS10.map((s,i)=>`<div><b>${String(i+1).padStart(2,"0")}</b><h4>${s[0]}</h4><p>${s[1]}</p></div>`).join("")}</div>
-   <h3 style="font-size:32px;margin:48px 0 16px">7 quality checkpoints</h3>
-   <div class="qc">${QC7.map((q,i)=>`<div><b>QC ${i+1}</b><h4>${q}</h4></div>`).join("")}</div></div></section>
+  <section class="h-feature"><div class="wrap"><div class="feat-card">
+   <div class="feat-img"><img src="${pimg(tw)}" alt="${esc(tw.name)}"></div>
+   <div class="feat-copy"><div class="dot-eyebrow">Teamwear</div><h2 class="h-h3">Match-ready kits, built for consistency across every squad.</h2><p>Coordinated jerseys, shorts, tracksuits and coaches wear produced as one program, so colours and fit stay consistent from youth teams to first team.</p>
+    <div class="tag-row">${(catOf("teamwear")||{subs:[]}).subs.slice(0,6).map(x=>`<span>${esc(x)}</span>`).join("")}</div>
+    <div class="mini-line">One team identity / match / training / travel</div>
+    <a class="pill-btn" href="#cat-teamwear">Explore teamwear →</a></div>
+  </div></div></section>
 
-  <section><div class="wrap"><div class="sec-head"><h2>Customization methods</h2><p>Every product can be branded with any of these, alone or combined.</p></div>
-   <div class="grid g4">${METHODS.map(m=>`<div class="method"><span class="ic">${m[0]}</span><div><h4>${m[1]}</h4><p>${m[2]}</p></div></div>`).join("")}</div></div></section>
+  <section class="h-pl"><div class="wrap"><div class="pl-grid"><div><div class="dot-eyebrow light">Private label &amp; customisation</div><h2 class="h-h2">Your brand, developed and manufactured end to end.</h2><p>Garment development, woven labels, hangtags, patches and packaging, made to your brand guide and shipped retail-ready.</p><div class="h-ctas"><a class="pill-btn" href="#private-label">Start your private label project →</a><a class="text-btn light" href="#manufacturing">View the process →</a></div></div>
+   <div class="pl-chips">${METHODS.map(m=>`<div><b>${m[0]}</b><span>${m[1]}</span></div>`).join("")}</div></div></div></section>
 
-  <section style="background:var(--sunk)"><div class="wrap"><div class="sec-head"><h2>Shipping to 8 markets</h2><p>Europe, North America, the Middle East and Oceania.</p></div>
-   <div class="grid g4">${MARKETS.map(m=>`<button class="market" data-act="market" data-id="${m[0]}"><span class="cc">${m[0]}</span><b>${m[1]}</b><span class="muted" style="font-size:13px">${m[3]}</span></button>`).join("")}</div></div></section>
+  <section class="h-qc"><div class="wrap"><div class="qc-grid">
+   <div><div class="dot-eyebrow">Quality control</div><h2 class="h-h2 plain">Quality checked at every stage of production.</h2><p class="h-sub">Each checkpoint changes the visual, so buyers can see the complete ${esc(s.company.split(" ")[0])} quality-control flow before packing.</p>
+    <div class="qc-list">${QCSTEPS.map((q,i)=>`<button class="qc-item ${i===qi?"on":""}" data-act="qcstep" data-i="${i}"><span class="qn">${String(i+1).padStart(2,"0")}</span><span><b>${q[0]}</b><small>${q[1]}</small></span></button>`).join("")}</div></div>
+   <div class="qc-stage"><div class="qc-card">${qcVisual(qi)}<div class="qc-cap"><span class="pin">Pinned checkpoint</span><h3>${QCSTEPS[qi][0]}</h3><p>${QCSTEPS[qi][1]}</p><span class="step">◎ ${esc(s.company.split(" ")[0].toUpperCase())} quality step ${String(qi+1).padStart(2,"0")}</span></div></div></div>
+  </div></div></section>
 
-  ${S.testimonials.length?`<section><div class="wrap"><div class="sec-head"><h2>What buyers say</h2></div>
-   <div class="grid g3">${S.testimonials.map(t=>`<blockquote class="quote" style="margin:0"><p>${esc(t.text)}</p><cite><b>${esc(t.name)}</b> · ${esc(t.role)}</cite></blockquote>`).join("")}</div></div></section>`:""}
+  <section class="h-prods"><div class="wrap"><div class="h-head"><div><div class="dot-eyebrow">Featured products</div><h2 class="h-h2 plain">Studio-clean product slots for serious buyers.</h2><p class="h-sub">Representative catalogue entries with SKU, category, buyer specs and customisation options, built for B2B product discovery.</p></div><a class="text-btn" href="#shop">View full catalogue →</a></div>
+   <div class="grid g4">${feat.map(p=>`<article class="slot"><a href="#product-${p.id}" class="slot-img"><img src="${pimg(p)}" alt="${esc(p.name)}" loading="lazy"></a><div class="slot-meta"><span>${esc((catOf(p.cat)||{}).name||"")}</span><span>${esc(p.sku)}</span></div><h3><a href="#product-${p.id}">${esc(p.name)}</a></h3><ul><li>${p.gsm?p.gsm+" GSM":"Custom spec"}</li><li>MOQ ${p.moq} pcs</li><li>Sample ${p.sample} days</li></ul><a class="text-btn sm" href="#product-${p.id}">View product →</a></article>`).join("")}</div></div></section>
 
-  <section style="padding-top:0"><div class="wrap"><div class="sec-head"><h2>Knowledge Center</h2><a class="btn" href="#blog">All guides</a></div>
+  <section class="h-markets"><div class="wrap"><div class="dot-eyebrow light">Global markets</div><h2 class="h-h2">Manufacturing for international buyers, worldwide.</h2><p class="h-sub light">${esc(s.company)} exports to priority markets across Europe, North America, the Middle East and Oceania.</p>
+   <div class="mk-grid">${MARKETS.map(m=>`<button class="mk" data-act="market" data-id="${m[0]}"><span class="fl">${FLAG(m[0]==="GB"?"GB":m[0])}</span>${m[1]}</button>`).join("")}</div></div></section>
+
+  ${S.testimonials.length?`<section><div class="wrap"><div class="h-head"><h2 class="h-h2 plain">What buyers say</h2></div><div class="grid g3">${S.testimonials.map(t=>`<blockquote class="quote" style="margin:0"><p>${esc(t.text)}</p><cite><b>${esc(t.name)}</b> · ${esc(t.role)}</cite></blockquote>`).join("")}</div></div></section>`:""}
+
+  <section class="h-guides"><div class="wrap"><div class="h-head"><div><div class="dot-eyebrow">Knowledge center</div><h2 class="h-h2 plain">Buyer guides on sourcing, fabrics and production.</h2></div><a class="text-btn" href="#blog">All guides →</a></div>
    <div class="grid g3">${S.posts.slice(0,3).map(postCard).join("")}</div></div></section>`;
 }
 const postCard=p=>`<article class="guide" data-go="post-${p.id}"><span class="eyebrow">${esc(p.cat)} · ${p.mins} min</span><h3>${esc(p.title)}</h3><span class="muted" style="font-size:13px">${fdate(p.date)} · ${esc(p.author)}</span></article>`;
@@ -229,7 +261,7 @@ function pgShop(){
   if(ui.shopQ){const q=ui.shopQ.toLowerCase();list=list.filter(p=>(p.name+p.sku+p.desc).toLowerCase().includes(q))}
   const c=catOf(ui.shopCat);
   const subs=c?c.subs.filter(s=>S.products.some(p=>p.cat===c.id&&p.sub===s&&p.active)):[];
-  return phead(c?esc(c.name):"Catalogue",c?esc(c.blurb):`${S.products.filter(p=>p.active).length} products across six families. Every item is made to order with your branding. Prices are quoted per program.`,`<a href="#home">Home</a> / <a data-act="shopcat" data-id="all">Shop</a>${c?" / "+esc(c.name):""}`)+
+  return phead(c?esc(c.name):"Products built around <em>your program.</em>",c?esc(c.blurb):`${S.products.filter(p=>p.active).length} products across six families. Every item is made to order with your branding. Prices are quoted per program.`,`<a href="#home">Home</a> / <a data-act="shopcat" data-id="all">Shop</a>${c?" / "+esc(c.name):""}`)+
   `<section style="padding-top:28px"><div class="wrap">
    <div class="toolbar"><button class="chip ${ui.shopCat==="all"?"on":""}" data-act="shopcat" data-id="all">All</button>${S.categories.map(k=>`<button class="chip ${ui.shopCat===k.id?"on":""}" data-act="shopcat" data-id="${k.id}">${esc(k.name)}</button>`).join("")}
    <input id="shopq" type="search" placeholder="Search name or SKU" value="${esc(ui.shopQ)}" style="margin-left:auto;min-width:0;flex:1 1 200px;max-width:280px"></div>
@@ -271,29 +303,30 @@ function pgProduct(id){
 
 function pgPrivate(){
   const st=["Brand brief","Product development","Material selection","Colour development","Printing","Embroidery","Woven labels","Neck labels","Size labels","Hangtags","Rubber / PVC patches","Custom packaging","Sampling","Review","Approval","Bulk production","Quality control","Export"];
-  return phead("Your brand. <span style='color:var(--accent)'>Manufactured by ORRA.</span>","We develop, brand and pack apparel under your label, from first sketch to retail-ready cartons.")+
-  `<section><div class="wrap"><div class="sec-head"><h2>18-step private label process</h2><a class="btn pri" href="#rfq">Start your private label project</a></div>
+  return phead("Your brand. <em>Manufactured by ORRA.</em>","There is no fixed catalogue to choose from. From first sketch to a finished, branded product, ORRA develops and manufactures apparel around your identity.")+
+  `<section class="pl-statement"><div class="wrap"><p class="big-line">Your design. Your labels. Your packaging. <em>Our production floor.</em></p><p class="h-sub" style="margin-inline:auto;text-align:center">Every private label program is built from your brief: your fabric, your colours, your trims and your packaging, made on the same lines we use for teamwear and export orders.</p></div></section>
+  <section><div class="wrap"><div class="sec-head"><div><div class="dot-eyebrow">The process</div><h2>Eighteen steps from brief to export.</h2></div><a class="pill-btn" href="#rfq">Start your private label project →</a></div>
   <div class="steps" style="grid-template-columns:repeat(auto-fill,minmax(180px,1fr))">${st.map((s,i)=>`<div><b>${String(i+1).padStart(2,"0")}</b><h4>${s}</h4></div>`).join("")}</div></div></section>
   <section style="background:var(--sunk)"><div class="wrap"><div class="sec-head"><h2>Private label products</h2></div><div class="grid g4">${S.products.filter(p=>p.cat==="private-label"&&p.active).map(prodCard).join("")}</div></div></section>`;
 }
 function pgManufacturing(){
   const deps=["Cutting Department","Printing","Embroidery","Stitching Floor","Quality Control","Packing","Warehouse & Export"];
   const c=S.content;
-  return phead("Manufacturing","Full process visibility, structured quality control and production built for international buyers.")+
+  return phead("Built for buyers who want to <em>see how their product is made.</em>","Full process visibility, structured quality control and production planned around international delivery dates.")+
   `<section><div class="wrap">${statBlock(c)}
-  <div class="sec-head" style="margin-top:40px"><h2>10 production stages</h2></div><div class="steps">${STEPS10.map((s,i)=>`<div><b>${String(i+1).padStart(2,"0")}</b><h4>${s[0]}</h4><p>${s[1]}</p></div>`).join("")}</div></div></section>
-  <section style="background:var(--sunk)"><div class="wrap"><div class="sec-head"><h2>Departments</h2></div><div class="grid g4">${deps.map((d,i)=>`<div class="cat-card"><div class="img"><img src="${S.media[i]?S.media[i].src:garment(["jersey","hoodie","polo","jacket","shorts","pack","puffer"][i],"#3a3a38","#F26A1B")}" alt="${d}"></div><div class="body"><h3 style="font-size:22px">${d}</h3></div></div>`).join("")}</div></div></section>`;
+  <div class="sec-head" style="margin-top:40px"><div><div class="dot-eyebrow">Production flow</div><h2>Ten stages. One accountable team.</h2></div><a class="pill-btn" href="#rfq">Request quote →</a></div><div class="steps">${STEPS10.map((s,i)=>`<div><b>${String(i+1).padStart(2,"0")}</b><h4>${s[0]}</h4><p>${s[1]}</p></div>`).join("")}</div></div></section>
+  <section style="background:var(--sunk)"><div class="wrap"><div class="sec-head"><div><div class="dot-eyebrow">Inside the factory</div><h2>Every department under one roof.</h2></div></div><div class="grid g4">${deps.map((d,i)=>`<div class="cat-card"><div class="img"><img src="${S.media[i]?S.media[i].src:garment(["jersey","hoodie","polo","jacket","shorts","pack","puffer"][i],"#3a3a38","#F26A1B")}" alt="${d}"></div><div class="body"><h3 style="font-size:22px">${d}</h3></div></div>`).join("")}</div></div></section>`;
 }
 function pgMarkets(){
   const m=ui.market&&MARKETS.find(x=>x[0]===ui.market);
-  return phead("Global markets","We ship from Sialkot to clubs, schools and brands in eight core markets.")+
+  return phead("Manufacturing for international buyers, <em>worldwide.</em>","From Sialkot to clubs, academies, schools and brands across Europe, North America, the Middle East and Oceania.")+
   `<section><div class="wrap"><div class="grid g4">${MARKETS.map(x=>`<button class="market" data-act="market" data-id="${x[0]}" style="${ui.market===x[0]?"border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)":""}"><span class="cc">${x[0]}</span><b>${x[1]}</b><span class="mono muted">${x[2]}</span><span class="muted" style="font-size:13px">${x[3]}</span></button>`).join("")}</div>
   ${m?`<div class="panel" style="margin-top:20px"><span class="eyebrow">${m[2]}</span><h2 style="font-size:44px;margin:8px 0 12px">${m[1]} market briefing</h2><dl class="kv"><dt>Sports focus</dt><dd>${m[3]}</dd><dt>Buyers</dt><dd>Clubs, academies, schools, retailers and private-label brands</dd><dt>Shipping</dt><dd>Air or sea freight from Pakistan · EXW, FOB or DDP</dd><dt>Popular</dt><dd>${S.products.filter(p=>m[3].toLowerCase().includes((p.sub||"").split(" ")[0].toLowerCase())).slice(0,3).map(p=>`<a href="#product-${p.id}">${esc(p.name)}</a>`).join(", ")||"Teamwear programs"}</dd></dl><div style="margin-top:16px"><a class="btn pri" href="#rfq">Request quote for ${m[1]}</a></div></div>`:`<p class="muted" style="margin-top:16px">Select a market to see its briefing.</p>`}</div></section>`;
 }
 function statBlock(c,since){const it=[since&&["Established",since],c.statFactory&&["Facility",c.statFactory],c.statStaff&&["Team",c.statStaff],c.statCapacity&&["Capacity",c.statCapacity]].filter(Boolean);if(!it.length)return"";return `<div class="stats ${it.length===3?"stats3":""}">${it.map(x=>`<div class="stat"><span>${x[0]}</span><b>${esc(x[1])}</b></div>`).join("")}</div>`}
 function pgAbout(){
   const s=S.settings,c=S.content;
-  return phead("A manufacturing partner, not a generic supplier",esc(c.aboutText))+
+  return phead("A manufacturing partner, <em>not a generic supplier.</em>",esc(c.aboutText))+
   `<section><div class="wrap">${statBlock(c,s.since)}
   <div class="sec-head" style="margin-top:40px"><h2>Business credentials</h2></div>
   <div class="grid g3">${s.scci?`<div class="cert"><span class="seal">SCCI</span><h4 style="font-size:22px">Sialkot Chamber of Commerce</h4><p class="muted">Membership No. ${esc(s.scci)}</p></div>`:""}
@@ -305,7 +338,7 @@ function pgAbout(){
 function pgBlog(){
   const cats=["All",...new Set(S.posts.map(p=>p.cat))]; const f=ui.blogCat||"All";
   const list=S.posts.filter(p=>f==="All"||p.cat===f);
-  return phead("Knowledge Center","Buyer guides on sourcing, fabrics, printing and production.")+
+  return phead("Buyer guides on sourcing, <em>fabrics and production.</em>","Practical answers for buyers planning custom sportswear, teamwear and private-label orders.")+
   `<section><div class="wrap"><div class="toolbar">${cats.map(c=>`<button class="chip ${f===c?"on":""}" data-act="blogcat" data-id="${esc(c)}">${esc(c)}</button>`).join("")}</div><div class="grid g3" style="row-gap:32px">${list.map(postCard).join("")}</div></div></section>`;
 }
 function pgPost(id){
@@ -315,7 +348,7 @@ function pgPost(id){
 }
 function pgContact(){
   const s=S.settings;
-  return phead("Contact","Talk to our production team about your next program.")+
+  return phead("Talk to the team that <em>makes your product.</em>","Share your sport, quantities and delivery date. A production specialist replies within one working day.")+
   `<section><div class="wrap"><div class="grid g2" style="gap:32px">
    <div class="panel"><h3 style="font-size:30px;margin-bottom:16px">Send us a message</h3><form class="form" id="contactForm" novalidate>
     <div class="f2"><div class="field"><label for="c_name">Full name *</label><input id="c_name" required value="${esc(session.user?session.user.name:"")}"></div><div class="field"><label for="c_email">Email *</label><input id="c_email" type="email" required value="${esc(session.user?session.user.email:"")}"></div></div>
@@ -341,13 +374,13 @@ function pgRfq(){
   if(st===5) body=`<h3>Target delivery</h3><p class="muted" style="margin:6px 0 16px">When do you need goods delivered?</p>${opts(DELIV,"delivery")}<div class="field" style="margin-top:14px"><label for="r_notes">Additional notes</label><textarea id="r_notes">${esc(r.notes||"")}</textarea></div>`;
   if(st===6) body=`<h3>Your details</h3><p class="muted" style="margin:6px 0 16px">We reply within one working day.</p><div class="form"><div class="f2"><div class="field"><label for="r_name">Full name *</label><input id="r_name" value="${esc(r.name||u?.name||"")}"></div><div class="field"><label for="r_company">Company *</label><input id="r_company" value="${esc(r.company||u?.company||"")}"></div></div><div class="f2"><div class="field"><label for="r_country">Country *</label><input id="r_country" value="${esc(r.country||u?.country||"")}"></div><div class="field"><label for="r_email">Email *</label><input id="r_email" type="email" value="${esc(r.email||u?.email||"")}"></div></div><div class="field"><label for="r_phone">WhatsApp / phone *</label><input id="r_phone" value="${esc(r.phone||u?.phone||"")}"></div><label class="switch"><input type="checkbox" id="r_consent"> I agree to the <a href="#privacy-policy">privacy policy</a> and <a href="#terms">terms</a></label></div>`;
   if(st===7) return phead("Brief received","")+`<section><div class="wrap"><div class="panel" style="max-width:620px"><span class="eyebrow">Reference</span><h2 style="font-size:56px;margin:6px 0 12px">${esc(r.done)}</h2><p>Thank you. Our production team will reply within one working day with questions or a quotation.</p><p class="muted" style="margin-top:8px">${session.user?"Track this brief in your buyer panel.":"Create a buyer account with the same email to track status online."}</p><div style="display:flex;gap:10px;margin-top:18px;flex-wrap:wrap"><a class="btn pri" href="#account">Go to buyer panel</a><button class="btn" data-act="rfqnew">Start another brief</button></div></div></div></section>`;
-  return phead("Production brief","Six quick steps · no account needed · about 3 minutes.")+
+  return phead("Start your <em>production brief.</em>","Six quick steps. No account needed. About three minutes.")+
   `<section><div class="wrap"><div class="panel" style="max-width:820px"><div class="progress">${[1,2,3,4,5,6].map(i=>`<i class="${i<=st?"on":""}"></i>`).join("")}</div><span class="mono muted">Step ${st} of 6</span><div style="margin-top:8px">${body}</div><p class="err" id="r_err" style="margin-top:10px"></p>
   <div style="display:flex;justify-content:space-between;margin-top:20px;gap:10px">${st>1?`<button class="btn" data-act="rfqback">Back</button>`:"<span></span>"}<button class="btn pri" data-act="rfqnext">${st===6?"Submit production brief":"Continue"}</button></div></div>
   ${S.cart.length?`<p class="muted" style="margin-top:12px">${S.cart.length} item(s) from your RFQ cart will be attached.</p>`:""}</div></section>`;
 }
 function pgCart(){
-  return phead("RFQ cart","Collect products, set quantities and send them as one brief.")+
+  return phead("Your <em>RFQ cart.</em>","Collect products, set quantities and send them as one production brief.")+
   `<section><div class="wrap">${S.cart.length?`<div class="tbl-wrap"><table class="t"><thead><tr><th></th><th>Product</th><th>Qty</th><th>Sizes</th><th>Colour</th><th>Notes</th><th></th></tr></thead><tbody>${S.cart.map((it,i)=>{const p=prod(it.pid);if(!p)return"";return `<tr><td><img class="thumb" src="${pimg(p)}" alt=""></td><td><b>${esc(p.name)}</b><br><span class="mono muted">${esc(p.sku)}</span></td><td><input data-cart="${i}" data-f="qty" type="number" min="${p.moq}" value="${it.qty}" style="width:80px;padding:6px;border:1px solid var(--line);border-radius:4px;background:var(--surface)"></td><td><input data-cart="${i}" data-f="size" value="${esc(it.size)}" style="width:100px;padding:6px;border:1px solid var(--line);border-radius:4px;background:var(--surface)"></td><td><select data-cart="${i}" data-f="color" style="padding:6px;border:1px solid var(--line);border-radius:4px;background:var(--surface)">${p.colors.map(c=>`<option ${c===it.color?"selected":""}>${esc(c)}</option>`).join("")}</select></td><td><input data-cart="${i}" data-f="note" value="${esc(it.note)}" placeholder="Logo, names…" style="width:150px;padding:6px;border:1px solid var(--line);border-radius:4px;background:var(--surface)"></td><td><button class="btn sm danger" data-act="cartrm" data-i="${i}">Remove</button></td></tr>`}).join("")}</tbody></table></div>
    <p class="mono muted" style="margin-top:10px">Total ${S.cart.reduce((a,b)=>a+ +b.qty,0)} pcs · MOQ ${50} per design / colour</p>
    <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap"><button class="btn pri" data-act="cartsubmit">Submit as production brief</button><a class="btn" href="https://wa.me/${S.settings.whatsapp.replace(/\D/g,"")}?text=${encodeURIComponent("RFQ: "+S.cart.map(it=>(prod(it.pid)||{}).sku+" x"+it.qty).join(", "))}" target="_blank" rel="noopener">Send on WhatsApp</a><a class="btn ghost" href="#shop">Add more products</a></div>`
@@ -442,7 +475,9 @@ const A={
   const f=(k,l,ta)=>`<div class="field"><label for="ct_${k}">${l}</label>${ta?`<textarea id="ct_${k}" data-ct="${k}">${esc(c[k])}</textarea>`:`<input id="ct_${k}" data-ct="${k}" value="${esc(c[k])}">`}</div>`;
   return `<h2>Homepage & pages</h2><form class="form" id="contentForm" style="margin-top:16px">
   <div class="panel form"><h3 style="font-size:24px">Hero</h3>${f("heroTitle","Hero headline")}${f("heroSub","Hero text",1)}
-   <div class="field"><label>Hero image</label><div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">${c.heroImage?`<img src="${c.heroImage}" style="width:160px;border-radius:6px" alt="">`:'<span class="muted">Using product artwork collage</span>'}<label class="btn sm" for="heroUp">Change image</label><input id="heroUp" type="file" accept="image/*" hidden>${c.heroImage?`<button type="button" class="btn sm danger" data-act="herorm">Remove</button>`:""}</div></div></div>
+   <div class="field"><label>Hero image</label><div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">${c.heroImage?`<img src="${c.heroImage}" style="width:160px;border-radius:6px" alt="">`:'<span class="muted">Using product artwork collage</span>'}<label class="btn sm" for="heroUp">Change image</label><input id="heroUp" type="file" accept="image/*" hidden>${c.heroImage?`<button type="button" class="btn sm danger" data-act="herorm">Remove</button>`:""}</div><p class="muted" style="font-size:12px;margin-top:4px">Shown while the video loads, and on its own when there is no video.</p></div>
+   <div class="field"><label>Hero video</label><div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">${c.heroVideo?`<video src="${esc(c.heroVideo)}" muted loop autoplay playsinline style="width:200px;border-radius:6px"></video>`:'<span class="muted">No video</span>'}<label class="btn sm" for="heroVid">${c.heroVideo?"Change video":"Upload video"}</label><input id="heroVid" type="file" accept="video/mp4,video/webm" hidden>${c.heroVideo?`<button type="button" class="btn sm danger" data-act="hvrm">Remove</button>`:""}</div><p class="muted" style="font-size:12px;margin-top:4px">MP4 or WebM, up to 45 MB. A short 10–20 second loop without sound works best. It plays muted.</p><p class="err" id="hv_err"></p></div></div>
+  <div class="panel form"><h3 style="font-size:24px">Quality control photos</h3><p class="muted" style="font-size:13px">One photo per checkpoint on the homepage. Empty slots show product artwork.</p><div class="media-grid">${QCSTEPS.map((q,i)=>`<figure>${(c.qcImages||[])[i]?`<img src="${esc(c.qcImages[i])}" alt="">`:`<div style="aspect-ratio:1;background:var(--sunk)"></div>`}<figcaption><span>${String(i+1).padStart(2,"0")} ${esc(q[0])}</span></figcaption><div style="display:flex;gap:4px;padding:0 6px 6px"><label class="btn sm" for="qcUp${i}">Upload</label><input id="qcUp${i}" data-qc="${i}" type="file" accept="image/*" hidden>${(c.qcImages||[])[i]?`<button type="button" class="btn sm danger" data-act="qcrm" data-i="${i}">✕</button>`:""}</div></figure>`).join("")}</div></div>
   <div class="panel form"><h3 style="font-size:24px">Ticker & call to action</h3>${f("ticker","Ticker text")}${f("ctaTitle","Closing call-to-action headline")}</div>
   <div class="panel form"><h3 style="font-size:24px">About & factory numbers</h3>${f("aboutText","About text",1)}<div class="f2">${f("statFactory","Facility size")}${f("statStaff","Team size")}</div>${f("statCapacity","Monthly capacity")}</div>
   <div><button class="btn pri" type="submit">Save changes</button> <a class="btn ghost" href="#home">View homepage</a></div></form>`;
@@ -580,6 +615,11 @@ document.addEventListener("click",e=>{
    case"mreply":{const m=S.messages.find(x=>x.id===id);const v=$("#rep_"+id).value.trim();if(!v){toast("Write a reply first");break}m.reply=v;m.status="Replied";log("Replied to "+m.email);toast("Reply saved. The buyer sees it in their panel.");render();break}
    case"mdel":confirmModal("Delete this message?",()=>{S.messages=S.messages.filter(m=>m.id!==id);log("Deleted a message");render()});break;
    case"mmdel":S.media.splice(+el.dataset.i,1);log("Removed a media file");render();break;
+   case"qcstep":ui.qc=+el.dataset.i;{const y=window.scrollY;render();window.scrollTo(0,y)}break;
+   case"hvsound":{const v=document.querySelector(".hv-media");if(v&&v.tagName==="VIDEO"){v.muted=!v.muted;if(!v.muted)v.play();el.textContent=v.muted?"🔇 Sound":"🔊 Sound";el.setAttribute("aria-label",v.muted?"Turn sound on":"Turn sound off")}break}
+   case"qcrm":{const a=S.content.qcImages||[];a[+el.dataset.i]="";S.content.qcImages=a;log("Removed QC photo");render();break}
+   case"hvrm":S.content.heroVideo="";log("Removed hero video");render();break;
+   case"hvmute":{const v=document.querySelector(".hv-media");if(v&&v.tagName==="VIDEO"){if(v.paused){v.play();el.textContent="Pause"}else{v.pause();el.textContent="Play"}}break}
    case"herorm":S.content.heroImage="";log("Removed hero image");render();break;
    case"bedit":blogModal(id);break;
    case"bdel":confirmModal("Delete this guide?",()=>{S.posts=S.posts.filter(p=>p.id!==id);log("Deleted guide");render()});break;
@@ -600,6 +640,8 @@ document.addEventListener("change",async e=>{
    try{
     if(t.id==="pf_up"){for(const f of [...t.files].slice(0,6))ui.editImgs.push(await upImg(f));drawEditImgs()}
     if(t.id==="mediaUp"){for(const f of t.files)S.media.push({name:f.name,src:await upImg(f,1000)});log("Uploaded "+t.files.length+" media file(s)");render();toast("Uploaded")}
+    if(t.dataset.qc!=null){const i=+t.dataset.qc;const a=S.content.qcImages||[];a[i]=await upImg(t.files[0],1200);S.content.qcImages=[...a].map(x=>x||"");log("Changed QC photo "+(i+1));render();toast("Photo updated");return}
+    if(t.id==="heroVid"){const f=t.files[0];const er=document.getElementById("hv_err");if(f.size>45*1024*1024){er.textContent="This video is "+(f.size/1048576).toFixed(0)+" MB. Use one under 45 MB.";return}if(!LIVE.sb){er.textContent="Video upload needs the live database.";return}er.style.color="var(--muted)";er.textContent="Uploading "+(f.size/1048576).toFixed(1)+" MB…";const name="v/"+Date.now().toString(36)+(f.type==="video/webm"?".webm":".mp4");const {error}=await LIVE.sb.storage.from("media").upload(name,f,{contentType:f.type||"video/mp4"});if(error){er.style.color="";er.textContent="Upload failed: "+error.message;return}S.content.heroVideo=LIVE.sb.storage.from("media").getPublicUrl(name).data.publicUrl;log("Changed hero video");render();toast("Hero video updated");return}
     if(t.id==="heroUp"){S.content.heroImage=await upImg(t.files[0],1400);log("Changed hero image");render();toast("Hero image updated")}
     if(t.id==="cf_up"){ui.catImg=await upImg(t.files[0]);$("#cf_prev").src=ui.catImg}
    }catch(x){toast("That file could not be read as an image.")}
