@@ -31,6 +31,7 @@ function garment(type,c1,c2,view){
 }
 
 /* ============ seed data ============ */
+const CAT_HEAD={"sportswear": "Engineered for training, competition and <em>custom team identity.</em>", "teamwear": "One kit program for <em>every squad you run.</em>", "outerwear": "Built for the sideline, <em>the street and the weather.</em>", "casual-wear": "Everyday essentials, <em>finished like merchandise.</em>", "fitness-performance": "Made to move, <em>built to last the session.</em>", "private-label": "Your label on every piece. <em>Our production behind it.</em>"};
 const CATS=[
  {id:"sportswear",name:"Sportswear",blurb:"Sport-specific jerseys and uniforms for football, basketball, baseball, American football, cricket, rugby, cycling and golf.",subs:["Football / Soccer","Basketball","Baseball","American Football","Cricket","Rugby","Volleyball","Cycling","Golf"],type:"jersey",c:["Black","Orange"]},
  {id:"teamwear",name:"Teamwear",blurb:"Full club programs: match kits, training kits, tracksuits, warm-ups and coaches wear.",subs:["Team Jerseys","Match Kits","Training Kits","Tracksuits","Warm-Up Sets","Coaches Wear","Club Apparel"],type:"tracksuit",c:["Navy","Orange"]},
@@ -94,7 +95,7 @@ const TESTI=[
 const SEED={
  v:3,
  settings:{company:"ORRA Industries",tagline:"Built for performance",email:"mrabid320@gmail.com",phone:"+92 340 0420528",whatsapp:"+92 340 0420528",address:"Sialkot, Punjab, Pakistan",hours:"",instagram:"https://www.instagram.com/orra_apperal_international",facebook:"",linkedin:"",scci:"",ntn:"",since:"",metaTitle:"Custom Sportswear & Teamwear Manufacturer | ORRA Industries",metaDesc:"ORRA Industries manufactures custom sportswear, teamwear and private-label apparel in Pakistan. MOQ 50 pieces, samples in 7–10 working days.",showPrices:false,maintenance:false},
- content:{heroTitle:"Built for teams. Manufactured for brands.",heroSub:"Custom sportswear, teamwear and private-label apparel made in Sialkot, Pakistan for clubs, academies and brands in 8 export markets.",heroImage:"",heroVideo:"",qcImages:[],ticker:"MOQ 50 pieces per design · Samples in 7–10 working days · Bulk in 27–30 working days · Shipping worldwide from Sialkot",aboutText:"ORRA Industries is a manufacturing partner, not a generic supplier. We produce sportswear, teamwear and private-label apparel for clubs, academies, schools and brands across Europe, North America, the Middle East and Oceania.",ctaTitle:"Ready to start your production brief?",statFactory:"",statStaff:"",statCapacity:""},
+ content:{heroTitle:"Built for teams. Manufactured for brands.",heroSub:"Custom sportswear, teamwear and private-label apparel made in Sialkot, Pakistan for clubs, academies and brands in 8 export markets.",heroImage:"",heroVideo:"",qcImages:[],banners:{},ticker:"MOQ 50 pieces per design · Samples in 7–10 working days · Bulk in 27–30 working days · Shipping worldwide from Sialkot",aboutText:"ORRA Industries is a manufacturing partner, not a generic supplier. We produce sportswear, teamwear and private-label apparel for clubs, academies, schools and brands across Europe, North America, the Middle East and Oceania.",ctaTitle:"Ready to start your production brief?",statFactory:"",statStaff:"",statCapacity:""},
  categories:CATS,
  products:SEED_PRODUCTS,
  posts:POSTS,
@@ -168,7 +169,8 @@ function header(){
 function footer(){
   const s=S.settings;
   const types=[...new Set(S.products.filter(p=>p.active).map(p=>p.sub))].slice(0,10);
-  return `<section class="f-cta"><div class="wrap"><h2>From product development to custom labels, packaging and bulk export.</h2><a class="pill-btn" href="#rfq">Request quote →</a></div></section>
+  const hasCta=route==="shop"||route.startsWith("cat-")||route.startsWith("product-");
+  return `${hasCta?"":`<section class="f-cta"><div class="wrap"><h2>From product development to custom labels, packaging and bulk export.</h2><a class="pill-btn" href="#rfq">Request quote →</a></div></section>`}
   <footer class="site"><div class="wrap"><div class="cols f5">
    <div><a class="f-brand" href="#home"><span class="glyph" aria-hidden="true"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="15" fill="none" stroke="#fff" stroke-width="7"/><path d="M8 30 L30 9" stroke="var(--accent)" stroke-width="4"/></svg></span><b>${esc(s.company.toUpperCase())}</b></a><p style="margin-top:14px;max-width:280px">${esc(s.company)} is a custom sportswear, teamwear and private-label apparel manufacturer serving international B2B buyers: clubs, academies, schools, brands and distributors.</p><p class="f-tag">Custom apparel manufacturing / ${esc(s.address.split(",")[0])}, Pakistan</p></div>
    <div><h5>Company</h5><a href="#about">About ${esc(s.company.split(" ")[0])}</a><a href="#manufacturing">Manufacturing</a><a href="#private-label">Private Label</a><a href="#markets">Global Markets</a><a href="#blog">Knowledge Center</a><a href="#contact">Contact</a></div>
@@ -181,7 +183,16 @@ function footer(){
   <a class="wa" href="https://wa.me/${s.whatsapp.replace(/\D/g,"")}" target="_blank" rel="noopener">WhatsApp</a>`;
 }
 const EYEBROW={shop:"Product catalogue — made to order","private-label":"Private label & customisation",manufacturing:"Manufacturing transparency",markets:"Global markets",about:"About the manufacturer",blog:"Knowledge center",contact:"Contact the production team",rfq:"Production brief",cart:"Request for quotation",faq:"Buyer questions","privacy-policy":"Legal",terms:"Legal",account:"Buyer account",admin:"Staff area"};
-function phead(title,sub,crumbs){const eb=EYEBROW[route]||(route.startsWith("cat-")?"Product family":route.startsWith("post-")?"Buyer guide":"");return `<div class="phead"><div class="wrap">${crumbs?`<div class="crumbs">${crumbs}</div>`:""}${eb?`<div class="dot-eyebrow">${eb}</div>`:""}<h1>${title}</h1>${sub?`<p>${sub}</p>`:""}</div></div>`}
+const BANNER_PAGES=[["shop","Shop / catalogue"],["private-label","Private Label"],["manufacturing","Manufacturing"],["markets","Global Markets"],["about","About"],["blog","Knowledge Center"],["contact","Contact"],["rfq","Production brief"],["faq","FAQ"]];
+function bannerImg(){const b=S.content.banners||{};if(route.startsWith("cat-")){const c=catOf(route.slice(4));if(c)return c.banner||c.image||b.shop||""}if(route.startsWith("post-")){const p=S.posts.find(x=>x.id===route.slice(5));return (p&&p.image)||b.blog||""}return b[route]||""}
+function phead(title,sub,crumbs){
+  const eb=EYEBROW[route]||(route.startsWith("cat-")?"Product family":route.startsWith("post-")?"Buyer guide":"");
+  if(["account","admin","cart","privacy-policy","terms"].includes(route)||route.startsWith("product-"))return `<div class="phead"><div class="wrap">${crumbs?`<div class="crumbs">${crumbs}</div>`:""}${eb?`<div class="dot-eyebrow">${eb}</div>`:""}<h1>${title}</h1>${sub?`<p>${sub}</p>`:""}</div></div>`;
+  const img=bannerImg();
+  const kits=S.products.filter(p=>p.active&&(!route.startsWith("cat-")||p.cat===route.slice(4))).slice(0,4);
+  return `<section class="pbanner">${img?`<img class="pb-img" src="${esc(img)}" alt="">`:`<div class="pb-img pb-kits">${kits.map(k=>`<img src="${pimg(k)}" alt="">`).join("")}</div>`}<div class="pb-shade"></div>
+   <div class="wrap pb-inner">${crumbs?`<div class="crumbs">${crumbs}</div>`:""}${eb?`<div class="pb-eb">${eb}</div>`:""}<h1>${title}</h1>${sub?`<p>${sub}</p>`:""}</div></section>`;
+}
 
 /* ============ public pages ============ */
 function prodCard(p){
@@ -260,17 +271,22 @@ function pgShop(){
   if(ui.shopCat!=="all") list=list.filter(p=>p.cat===ui.shopCat);
   if(ui.shopSub) list=list.filter(p=>p.sub===ui.shopSub);
   if(ui.shopQ){const q=ui.shopQ.toLowerCase();list=list.filter(p=>(p.name+p.sku+p.desc).toLowerCase().includes(q))}
-  const c=catOf(ui.shopCat);
+  const c=catOf(ui.shopCat), co=S.settings.company.split(" ")[0];
   const subs=c?c.subs.filter(s=>S.products.some(p=>p.cat===c.id&&p.sub===s&&p.active)):[];
-  return phead(c?esc(c.name):"Products built around <em>your program.</em>",c?esc(c.blurb):`${S.products.filter(p=>p.active).length} products across ${S.categories.length} families. Every item is made to order with your branding. Prices are quoted per program.`,`<a href="#home">Home</a> / <a data-act="shopcat" data-id="all">Shop</a>${c?" / "+esc(c.name):""}`)+
-  `<section style="padding-top:28px"><div class="wrap">
-   <div class="toolbar"><button class="chip ${ui.shopCat==="all"?"on":""}" data-act="shopcat" data-id="all">All</button>${S.categories.map(k=>`<button class="chip ${ui.shopCat===k.id?"on":""}" data-act="shopcat" data-id="${k.id}">${esc(k.name)}</button>`).join("")}
-   <input id="shopq" type="search" placeholder="Search name or SKU" value="${esc(ui.shopQ)}" style="margin-left:auto;min-width:0;flex:1 1 200px;max-width:280px"></div>
-   ${subs.length?`<div class="toolbar" style="margin-top:0"><span class="mono muted">Type:</span><button class="chip ${!ui.shopSub?"on":""}" data-act="shopsub" data-id="">All</button>${subs.map(s=>`<button class="chip ${ui.shopSub===s?"on":""}" data-act="shopsub" data-id="${esc(s)}">${esc(s)}</button>`).join("")}</div>`:""}
-   <p class="mono muted" style="margin-bottom:14px">${list.length} products</p>
-   ${list.length?`<div class="grid g4">${list.map(prodCard).join("")}</div>`:`<div class="empty">No products match. Try another category or clear the search.</div>`}
-  </div></section>`;
+  const crumbs=`<a href="#home">Home</a> / <a href="#shop">Shop</a>${c?" / "+esc(c.name):""}`;
+  const head=c?phead(c.headline?esc(c.headline):(CAT_HEAD[c.id]||esc(c.name)+" <em>made to your brief.</em>"),"",crumbs)
+              :phead("Products built around <em>your program.</em>",`${S.products.filter(p=>p.active).length} products across ${S.categories.length} families. Every item is made to order with your branding.`,crumbs);
+  return head+(c?`<section class="dk-sec"><div class="wrap brief-grid"><div><div class="dot-eyebrow">Category briefing</div><p class="brief-text">${esc(c.brief||(co+" manufactures "+c.name.toLowerCase()+" for clubs, academies, schools and brands. "+c.blurb))}</p><p class="brief-text muted">Every piece is developed around your specification, from fabric selection to fit, and produced as a sample first so you can approve it before bulk.</p></div>
+   <div><div class="sub-label">Subcategories</div><div class="sub-chips">${c.subs.map(s=>`<button class="dchip" data-act="shopsub" data-id="${esc(s)}">${esc(s)}</button>`).join("")}</div></div></div></section>`:"")+
+  `<section class="dk-sec" style="padding-top:${c?"8px":"40px"}"><div class="wrap">
+   <div class="dot-eyebrow">Featured products</div><h2 class="dk-h2">${c?esc(c.name)+" products manufactured by "+esc(co)+".":"The full "+esc(co)+" catalogue."}</h2><p class="h-sub">Representative product slots. Filter by ${c?"subcategory":"family"} to browse the range.</p>
+   <div class="pill-row">${c?`<button class="dpill ${!ui.shopSub?"on":""}" data-act="shopsub" data-id="">All ${esc(c.name)}</button>${(subs.length?subs:c.subs).map(s=>`<button class="dpill ${ui.shopSub===s?"on":""}" data-act="shopsub" data-id="${esc(s)}">${esc(s)}</button>`).join("")}`
+     :`<button class="dpill on" data-act="shopcat" data-id="all">All</button>${S.categories.map(k=>`<button class="dpill" data-act="shopcat" data-id="${k.id}">${esc(k.name)}</button>`).join("")}`}
+     <input id="shopq" type="search" placeholder="Search name or SKU" value="${esc(ui.shopQ)}"></div>
+   ${list.length?`<div class="grid g4">${list.map(prodCard).join("")}</div>`:`<div class="empty">No products in this ${ui.shopSub?"subcategory":"category"} yet. <a href="#rfq">Send a brief</a> and we will develop it for you.</div>`}
+  </div></section>${ctaCard()}`;
 }
+function ctaCard(){const s=S.settings,co=s.company.split(" ")[0];return `<section class="cta-wrap"><div class="wrap"><div class="cta-card"><div><div class="pb-eb">Request quote / production brief</div><h2>Ready to brief your next ${esc(co)} apparel range?</h2><p>Share product type, quantity, customisation and target delivery. ${esc(co)} replies with the next production step.</p></div><div class="cta-acts"><a class="pill-btn" href="#rfq">Request quote →</a><a class="text-btn light" href="https://wa.me/${s.whatsapp.replace(/\D/g,"")}" target="_blank" rel="noopener">WhatsApp →</a></div></div></div></section>`}
 
 function pgProduct(id){
   const p=prod(id); if(!p||!p.active) return phead("Product not found","This product is no longer listed.")+`<section><div class="wrap"><a class="btn" href="#shop">Back to catalogue</a></div></section>`;
@@ -287,19 +303,21 @@ function pgProduct(id){
    faq:`<details class="faq"><summary>Can I mix sizes within the MOQ?</summary><p>Yes. The 50-piece minimum is per design and colour; sizes can be split freely.</p></details><details class="faq"><summary>Do you charge for samples?</summary><p>Sample cost is quoted with your brief and credited against bulk orders above 300 pieces.</p></details><details class="faq"><summary>Which shipping terms do you offer?</summary><p>EXW, FOB Karachi/Lahore or DDP door delivery by air or sea.</p></details>`
   };
   const rel=S.products.filter(x=>x.cat===p.cat&&x.id!==p.id&&x.active).slice(0,4);
-  return `<div class="wrap"><div class="crumbs" style="color:var(--muted);padding-top:20px"><a href="#home">Home</a> / <a data-act="shopcat" data-id="all">Shop</a> / <a data-act="shopcat" data-id="${p.cat}">${esc(c?c.name:"")}</a> / ${esc(p.name)}</div>
-  <div class="pd"><div class="gallery"><div class="main"><img src="${imgs[ui.pimg%imgs.length]}" alt="${esc(p.name)}"></div>
+  const n=imgs.length, k=ui.pimg%n;
+  return `<div class="wrap"><div class="crumbs" style="color:var(--muted);padding-top:20px"><a href="#home">Home</a> / <a href="#shop">Shop</a> / <a href="#cat-${p.cat}">${esc(c?c.name:"")}</a> / ${esc(p.name)}</div>
+  <div class="pd"><div class="gallery"><div class="pc-pills">${p.colors.map(x=>`<button class="${(color||p.colors[0])===x?"on":""}" data-act="pcolor" data-c="${esc(x)}"><i style="background:${col(x)}"></i>${esc(x)}</button>`).join("")}</div>
+   <div class="main"><span class="g-cap">${esc(color||p.colors[0])} · ${views[k]||"Photo"} / ${k+1} of ${n}</span><img src="${imgs[k]}" alt="${esc(p.name)}">${n>1?`<button class="g-arr l" data-act="pimg" data-i="${(k-1+n)%n}" aria-label="Previous photo">‹</button><button class="g-arr r" data-act="pimg" data-i="${(k+1)%n}" aria-label="Next photo">›</button>`:""}</div>
    <div class="thumbs">${imgs.map((im,i)=>`<button class="${i===ui.pimg%imgs.length?"on":""}" data-act="pimg" data-i="${i}" aria-label="${views[i]||"Photo "+(i+1)}"><img src="${im}" alt=""></button>`).join("")}</div></div>
-   <div><span class="mono muted">${esc(p.sku)}</span><h1 style="margin-top:6px">${esc(p.name)}</h1><p style="margin-top:12px">${esc(p.desc)}</p>
+   <div><span class="p-meta"><b>${esc(c?c.name:"")}</b> ${esc(p.sku)}</span><h1 style="margin-top:6px">${esc(p.name)}</h1><p style="margin-top:12px">${esc(p.desc)}</p>
    <div class="facts"><div><b>${p.moq} pcs</b><span>MOQ / colour</span></div><div><b>${p.sample}</b><span>Sample days</span></div><div><b>${p.bulk}</b><span>Bulk days</span></div></div>
    ${S.settings.showPrices&&p.price?`<p style="font-family:var(--display);font-size:30px;margin-bottom:10px">${esc(p.price)} <span class="mono muted">indicative</span></p>`:""}
    <span class="mono muted">Colour: ${esc(color||p.colors[0])}</span>
    <div class="swatches">${p.colors.map(x=>`<button class="${(color||p.colors[0])===x?"on":""}" data-act="pcolor" data-c="${esc(x)}"><i style="background:${col(x)}"></i>${esc(x)}</button>`).join("")}</div>
-   <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn pri" data-act="addcart" data-id="${p.id}">Add to RFQ cart</button><button class="btn" data-act="quote1" data-id="${p.id}">Request quote</button><button class="btn ghost" data-act="wish" data-id="${p.id}">${isWished(p.id)?"Saved":"Save"}</button></div>
+   <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="pill-btn" data-act="quote1" data-id="${p.id}">Request quote →</button><button class="pill-btn alt" data-act="addcart" data-id="${p.id}">+ Add to RFQ</button><button class="btn ghost" data-act="wish" data-id="${p.id}">${isWished(p.id)?"Saved":"Save"}</button></div>
    </div></div>
   <div class="tabs">${tabs.map(t=>`<button class="${ui.ptab===t[0]?"on":""}" data-act="ptab" data-t="${t[0]}">${t[1]}</button>`).join("")}</div>
   <div class="tabpane">${pane[ui.ptab]}</div>
-  ${rel.length?`<section style="padding-top:20px"><div class="sec-head"><h2 style="font-size:40px">Related products</h2></div><div class="grid g4">${rel.map(prodCard).join("")}</div></section>`:""}</div>`;
+  ${rel.length?`<section style="padding-top:20px"><div class="dot-eyebrow">Related products</div><h2 class="dk-h2">More from ${esc(c?c.name:"this range")}</h2><div class="grid g4" style="margin-top:20px">${rel.map(prodCard).join("")}</div></section>`:""}</div>${ctaCard()}`;
 }
 
 function pgPrivate(){
@@ -478,6 +496,7 @@ const A={
   <div class="panel form"><h3 style="font-size:24px">Hero</h3>${f("heroTitle","Hero headline")}${f("heroSub","Hero text",1)}
    <div class="field"><label>Hero image</label><div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">${c.heroImage?`<img src="${c.heroImage}" style="width:160px;border-radius:6px" alt="">`:'<span class="muted">Using product artwork collage</span>'}<label class="btn sm" for="heroUp">Change image</label><input id="heroUp" type="file" accept="image/*" hidden>${c.heroImage?`<button type="button" class="btn sm danger" data-act="herorm">Remove</button>`:""}</div><p class="muted" style="font-size:12px;margin-top:4px">Shown while the video loads, and on its own when there is no video.</p></div>
    <div class="field"><label>Hero video</label><div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">${c.heroVideo?`<video src="${esc(c.heroVideo)}" muted loop autoplay playsinline style="width:200px;border-radius:6px"></video>`:'<span class="muted">No video</span>'}<label class="btn sm" for="heroVid">${c.heroVideo?"Change video":"Upload video"}</label><input id="heroVid" type="file" accept="video/mp4,video/webm" hidden>${c.heroVideo?`<button type="button" class="btn sm danger" data-act="hvrm">Remove</button>`:""}</div><p class="muted" style="font-size:12px;margin-top:4px">MP4 or WebM, up to 45 MB. A short 10–20 second loop without sound works best. It plays muted.</p><p class="err" id="hv_err"></p></div></div>
+  <div class="panel form"><h3 style="font-size:24px">Page banners</h3><p class="muted" style="font-size:13px">The large photo at the top of each page. Category pages use the category's own banner (Categories → Edit).</p><div class="media-grid">${BANNER_PAGES.map(([k,l])=>{const im=(c.banners||{})[k];return `<figure>${im?`<img src="${esc(im)}" alt="">`:`<div style="aspect-ratio:1;background:var(--sunk)"></div>`}<figcaption><span>${l}</span></figcaption><div style="display:flex;gap:4px;padding:0 6px 6px"><label class="btn sm" for="bnUp_${k}">Upload</label><input id="bnUp_${k}" data-bn="${k}" type="file" accept="image/*" hidden>${im?`<button type="button" class="btn sm danger" data-act="bnrm" data-k="${k}">✕</button>`:""}</div></figure>`}).join("")}</div></div>
   <div class="panel form"><h3 style="font-size:24px">Quality control photos</h3><p class="muted" style="font-size:13px">One photo per checkpoint on the homepage. Empty slots show product artwork.</p><div class="media-grid">${QCSTEPS.map((q,i)=>`<figure>${(c.qcImages||[])[i]?`<img src="${esc(c.qcImages[i])}" alt="">`:`<div style="aspect-ratio:1;background:var(--sunk)"></div>`}<figcaption><span>${String(i+1).padStart(2,"0")} ${esc(q[0])}</span></figcaption><div style="display:flex;gap:4px;padding:0 6px 6px"><label class="btn sm" for="qcUp${i}">Upload</label><input id="qcUp${i}" data-qc="${i}" type="file" accept="image/*" hidden>${(c.qcImages||[])[i]?`<button type="button" class="btn sm danger" data-act="qcrm" data-i="${i}">✕</button>`:""}</div></figure>`).join("")}</div></div>
   <div class="panel form"><h3 style="font-size:24px">Ticker & call to action</h3>${f("ticker","Ticker text")}${f("ctaTitle","Closing call-to-action headline")}</div>
   <div class="panel form"><h3 style="font-size:24px">About & factory numbers</h3>${f("aboutText","About text",1)}<div class="f2">${f("statFactory","Facility size")}${f("statStaff","Team size")}</div>${f("statCapacity","Monthly capacity")}</div>
@@ -536,7 +555,7 @@ function rfqModal(id){
 function catModal(id){
   const c=id?catOf(id):{id:"",name:"",blurb:"",subs:[],type:"jersey",c:["Black","Orange"]};
   ui.catImg=null;
-  modal(`<h3>${id?"Edit category":"Add category"}</h3><form class="form" id="catForm" data-id="${c.id}"><div class="field"><label for="cf_name">Name</label><input id="cf_name" value="${esc(c.name)}"></div><div class="field"><label for="cf_blurb">Description</label><textarea id="cf_blurb">${esc(c.blurb)}</textarea></div><div class="field"><label for="cf_subs">Sub-categories (one per line)</label><textarea id="cf_subs" style="min-height:140px">${esc(c.subs.join("\n"))}</textarea></div><div class="field"><label>Cover image</label><div style="display:flex;gap:10px;align-items:center"><img src="${catImg(c)}" class="thumb" style="width:64px;height:64px" id="cf_prev" alt=""><label class="btn sm" for="cf_up">Change</label><input id="cf_up" type="file" accept="image/*" hidden></div></div><div class="foot"><button type="button" class="btn ghost" data-act="mclosebtn">Cancel</button><button class="btn pri" type="submit">Save</button></div></form>`);
+  modal(`<h3>${id?"Edit category":"Add category"}</h3><form class="form" id="catForm" data-id="${c.id}"><div class="field"><label for="cf_name">Name</label><input id="cf_name" value="${esc(c.name)}"></div><div class="field"><label for="cf_head">Banner headline</label><input id="cf_head" value="${esc(c.headline||"")}" placeholder="${esc((CAT_HEAD[c.id]||"").replace(/<\/?em>/g,""))}"></div><div class="field"><label for="cf_blurb">Short description (cards and menu)</label><textarea id="cf_blurb">${esc(c.blurb)}</textarea></div><div class="field"><label for="cf_brief">Category briefing (longer text on the category page)</label><textarea id="cf_brief">${esc(c.brief||"")}</textarea></div><div class="field"><label>Banner photo (wide)</label><div style="display:flex;gap:10px;align-items:center">${c.banner?`<img src="${esc(c.banner)}" class="thumb" style="width:110px;height:56px" id="cf_bprev" alt="">`:`<span class="muted" id="cf_bprev">Uses the cover image</span>`}<label class="btn sm" for="cf_bup">Upload</label><input id="cf_bup" type="file" accept="image/*" hidden></div></div><div class="field"><label for="cf_subs">Sub-categories (one per line)</label><textarea id="cf_subs" style="min-height:140px">${esc(c.subs.join("\n"))}</textarea></div><div class="field"><label>Cover image</label><div style="display:flex;gap:10px;align-items:center"><img src="${catImg(c)}" class="thumb" style="width:64px;height:64px" id="cf_prev" alt=""><label class="btn sm" for="cf_up">Change</label><input id="cf_up" type="file" accept="image/*" hidden></div></div><div class="foot"><button type="button" class="btn ghost" data-act="mclosebtn">Cancel</button><button class="btn pri" type="submit">Save</button></div></form>`);
 }
 function blogModal(id){
   const p=id?S.posts.find(x=>x.id===id):{id:"",title:"",cat:"Buying Guides",mins:5,author:"ORRA Production Team",date:now().slice(0,10),body:""};
@@ -568,9 +587,11 @@ function pageHTML(){
   else if(r==="admin")body=pgAdmin();
   else body=phead("Page not found","This page could not be found.")+`<section><div class="wrap"><a class="btn pri" href="#home">Back to home</a></div></section>`;
   const panel=r==="admin"&&session.admin||r==="account"&&curUser();
-  return linkify(header()+`<main>${body}</main>`+(panel?"":footer()));
+  return linkify(header()+`<main class="${r==="shop"||r.startsWith("cat-")||r.startsWith("product-")?"dk":""}">${body}</main>`+(panel?"":footer()));
 }
-function render(){$("#app").innerHTML=pageHTML();document.title=titleOf(route);save()}
+const EYE='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>',EYE_OFF='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3l18 18M10.6 5.1A10 10 0 0 1 12 5c6.5 0 10 7 10 7a17 17 0 0 1-3.3 4.2M6.6 6.6A17 17 0 0 0 2 12s3.5 7 10 7a10 10 0 0 0 4.4-1"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>';
+function addPwToggles(){document.querySelectorAll('input[type="password"]:not([data-pw])').forEach(inp=>{inp.dataset.pw="1";const w=document.createElement("span");w.className="pw-wrap";inp.parentNode.insertBefore(w,inp);w.appendChild(inp);const b=document.createElement("button");b.type="button";b.className="pw-eye";b.dataset.act="pwtoggle";b.setAttribute("aria-label","Show password");b.innerHTML=EYE;w.appendChild(b)})}
+function render(){$("#app").innerHTML=pageHTML();addPwToggles();document.title=titleOf(route);save()}
 function titleOf(r){const s=S.settings;if(r==="home")return s.metaTitle;if(r.startsWith("product-")){const p=prod(r.slice(8));return p?p.name+" | "+s.company:s.company}if(r.startsWith("post-")){const p=S.posts.find(x=>x.id===r.slice(5));return p?p.title+" | "+s.company:s.company}if(r.startsWith("cat-")){const c=catOf(r.slice(4));return c?"Custom "+c.name+" Manufacturer | "+s.company:s.company}const t={shop:"Product Catalogue","private-label":"Private Label Clothing Manufacturer",manufacturing:"Manufacturing Process",markets:"Export Markets",about:"About Us",blog:"Knowledge Center",contact:"Contact",rfq:"Request a Quote",cart:"RFQ Cart","privacy-policy":"Privacy Policy",terms:"Terms of Business",faq:"FAQ",account:"Buyer Account",admin:"Admin"}[r];return (t||"Page not found")+" | "+s.company}
 function descOf(r){const s=S.settings;if(r.startsWith("product-")){const p=prod(r.slice(8));if(p)return p.desc+" MOQ "+p.moq+" pcs, sample in "+p.sample+" working days. Made in Sialkot by "+s.company+"."}if(r.startsWith("post-")){const p=S.posts.find(x=>x.id===r.slice(5));if(p)return p.body.split("\n")[0].slice(0,155)}if(r.startsWith("cat-")){const c=catOf(r.slice(4));if(c)return c.blurb+" MOQ 50 pieces. Made in Sialkot, Pakistan."}return s.metaDesc}
 
@@ -582,6 +603,7 @@ document.addEventListener("click",e=>{
   const a=el.dataset.act, id=el.dataset.id;
   if(a==="mclose"&&e.target!==el)return;
   switch(a){
+   case"pwtoggle":{const i=el.parentNode.querySelector("input");const show=i.type==="password";i.type=show?"text":"password";el.innerHTML=show?EYE_OFF:EYE;el.setAttribute("aria-label",show?"Hide password":"Show password");i.focus();break}
    case"burger":$("#nav").classList.toggle("open");break;
    case"signout":LIVE.sb&&LIVE.sb.auth.signOut().then(()=>{location.href="/"});break;
    case"xreset":confirmModal("This restores the original demo products, quotes and settings.",()=>{try{localStorage.removeItem(KEY)}catch(x){}load();session={admin:false,user:null};saveSess();toast("Demo data reset");go("home")});break;
@@ -622,6 +644,7 @@ document.addEventListener("click",e=>{
    case"qcstep":ui.qc=+el.dataset.i;{const y=window.scrollY;render();window.scrollTo(0,y)}break;
    case"hvsound":{const v=document.querySelector(".hv-media");if(v&&v.tagName==="VIDEO"){v.muted=!v.muted;if(!v.muted)v.play();el.textContent=v.muted?"🔇 Sound":"🔊 Sound";el.setAttribute("aria-label",v.muted?"Turn sound on":"Turn sound off")}break}
    case"qcrm":{const a=S.content.qcImages||[];a[+el.dataset.i]="";S.content.qcImages=a;log("Removed QC photo");render();break}
+   case"bnrm":{const b=S.content.banners||{};delete b[el.dataset.k];S.content.banners={...b};log("Removed banner "+el.dataset.k);render();break}
    case"hvrm":S.content.heroVideo="";log("Removed hero video");render();break;
    case"hvmute":{const v=document.querySelector(".hv-media");if(v&&v.tagName==="VIDEO"){if(v.paused){v.play();el.textContent="Pause"}else{v.pause();el.textContent="Play"}}break}
    case"herorm":S.content.heroImage="";log("Removed hero image");render();break;
@@ -644,9 +667,11 @@ document.addEventListener("change",async e=>{
    try{
     if(t.id==="pf_up"){for(const f of [...t.files].slice(0,6))ui.editImgs.push(await upImg(f));drawEditImgs()}
     if(t.id==="mediaUp"){for(const f of t.files)S.media.push({name:f.name,src:await upImg(f,1000)});log("Uploaded "+t.files.length+" media file(s)");render();toast("Uploaded")}
+    if(t.dataset.bn!=null){const k=t.dataset.bn;const u=await upImg(t.files[0],1800);S.content.banners={...(S.content.banners||{}),[k]:u};log("Changed banner "+k);render();toast("Banner updated");return}
     if(t.dataset.qc!=null){const i=+t.dataset.qc;const a=S.content.qcImages||[];a[i]=await upImg(t.files[0],1200);S.content.qcImages=[...a].map(x=>x||"");log("Changed QC photo "+(i+1));render();toast("Photo updated");return}
     if(t.id==="heroVid"){const f=t.files[0];const er=document.getElementById("hv_err");if(f.size>45*1024*1024){er.textContent="This video is "+(f.size/1048576).toFixed(0)+" MB. Use one under 45 MB.";return}if(!LIVE.sb){er.textContent="Video upload needs the live database.";return}er.style.color="var(--muted)";er.textContent="Uploading "+(f.size/1048576).toFixed(1)+" MB…";const name="v/"+Date.now().toString(36)+(f.type==="video/webm"?".webm":".mp4");const {error}=await LIVE.sb.storage.from("media").upload(name,f,{contentType:f.type||"video/mp4"});if(error){er.style.color="";er.textContent="Upload failed: "+error.message;return}S.content.heroVideo=LIVE.sb.storage.from("media").getPublicUrl(name).data.publicUrl;log("Changed hero video");render();toast("Hero video updated");return}
     if(t.id==="heroUp"){S.content.heroImage=await upImg(t.files[0],1400);log("Changed hero image");render();toast("Hero image updated")}
+    if(t.id==="cf_bup"){ui.catBanner=await upImg(t.files[0],1800);const pv=$("#cf_bprev");if(pv)pv.outerHTML=`<img src="${ui.catBanner}" class="thumb" style="width:110px;height:56px" id="cf_bprev" alt="">`;return}
     if(t.id==="cf_up"){ui.catImg=await upImg(t.files[0]);$("#cf_prev").src=ui.catImg}
    }catch(x){toast("That file could not be read as an image.")}
   }
@@ -677,7 +702,7 @@ document.addEventListener("submit",e=>{
    if(id){Object.assign(prod(id),data);log("Updated product "+sku)}else{S.products.unshift({...data,id:sku.toLowerCase().replace(/[^a-z0-9]+/g,"-"),views:0,created:now()});log("Added product "+sku)}
    closeModal();toast("Product saved");render();return}
   if(f.id==="rfqForm"){const r=S.rfqs.find(x=>x.id===f.dataset.id);const old=r.status;r.status=v("rq_status");r.quote=v("rq_quote");r.reply=v("rq_reply");log(`Updated ${r.id}${old!==r.status?": "+old+" → "+r.status:""}`);closeModal();toast("Saved. The buyer sees the update.");render();return}
-  if(f.id==="catForm"){if(!v("cf_name")){toast("Enter a category name.");return}let c=f.dataset.id?catOf(f.dataset.id):null;if(!c){let base=v("cf_name").toLowerCase().replace(/&/g,"and").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")||"category",nid=base,n=2;while(catOf(nid))nid=base+"-"+(n++);c={id:nid,name:"",blurb:"",subs:[],type:"jersey",c:["Black","Orange"]};S.categories.push(c);log("Added category "+v("cf_name"))}c.name=v("cf_name");c.blurb=v("cf_blurb");c.subs=v("cf_subs").split("\n").map(s=>s.trim()).filter(Boolean);if(ui.catImg){c.image=ui.catImg;ui.catImg=null}log("Updated category "+c.name);closeModal();toast("Category saved");render();return}
+  if(f.id==="catForm"){if(!v("cf_name")){toast("Enter a category name.");return}let c=f.dataset.id?catOf(f.dataset.id):null;if(!c){let base=v("cf_name").toLowerCase().replace(/&/g,"and").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")||"category",nid=base,n=2;while(catOf(nid))nid=base+"-"+(n++);c={id:nid,name:"",blurb:"",subs:[],type:"jersey",c:["Black","Orange"]};S.categories.push(c);log("Added category "+v("cf_name"))}c.name=v("cf_name");c.headline=v("cf_head");c.brief=$("#cf_brief").value.trim();if(ui.catBanner){c.banner=ui.catBanner;ui.catBanner=null}c.blurb=v("cf_blurb");c.subs=v("cf_subs").split("\n").map(s=>s.trim()).filter(Boolean);if(ui.catImg){c.image=ui.catImg;ui.catImg=null}log("Updated category "+c.name);closeModal();toast("Category saved");render();return}
   if(f.id==="blogForm"){const id=f.dataset.id;const d={title:v("bf_title"),cat:v("bf_cat"),author:v("bf_author"),date:v("bf_date"),mins:+v("bf_mins")||5,body:$("#bf_body").value};if(!d.title)return;if(id){Object.assign(S.posts.find(p=>p.id===id),d);log("Edited guide "+d.title)}else{S.posts.unshift({...d,id:d.title.toLowerCase().replace(/[^a-z0-9]+/g,"-").slice(0,50)});log("Published guide "+d.title)}closeModal();toast("Guide published");render();return}
   if(f.id==="contentForm"){f.querySelectorAll("[data-ct]").forEach(i=>S.content[i.dataset.ct]=i.value);log("Edited homepage content");toast("Content saved");render();return}
   if(f.id==="settingsForm"){f.querySelectorAll("[data-st]").forEach(i=>S.settings[i.dataset.st]=i.value);S.settings.showPrices=$("#st_showPrices").checked;log("Updated settings");toast("Settings saved");render();return}
