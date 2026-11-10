@@ -140,7 +140,7 @@ let route="home", ui={shopCat:"all",shopSub:"",shopQ:"",pcolor:null,pimg:0,ptab:
 function pathOf(r){if(!r||r==="home")return"/";if(r.startsWith("product-"))return"/product/"+r.slice(8);if(r.startsWith("post-"))return"/blog/"+r.slice(5);if(r.startsWith("cat-"))return"/shop/"+r.slice(4);return"/"+r}
 function routeOf(p){p=(p||"/").replace(/\/+$/,"")||"/";if(p==="/")return"home";let m;if(m=p.match(/^\/product\/(.+)/))return"product-"+m[1];if(m=p.match(/^\/blog\/(.+)/))return"post-"+m[1];if(m=p.match(/^\/shop\/(.+)/))return"cat-"+m[1];return p.slice(1)}
 function setRoute(r){route=r;ui.pcolor=null;ui.pimg=0;ui.ptab="overview";if(r.startsWith("cat-")){ui.shopCat=r.slice(4);ui.shopSub=""}else if(r==="shop"){ui.shopCat="all"}}
-function go(r){const p=pathOf(r);if(location.pathname!==p)history.pushState({},"",p);setRoute(r);render();window.scrollTo(0,0)}
+function go(r){const nv=typeof document!=="undefined"&&document.getElementById("nav");if(nv)nv.classList.remove("open");const p=pathOf(r);if(location.pathname!==p)history.pushState({},"",p);setRoute(r);render();window.scrollTo(0,0)}
 function linkify(h){return h.replace(/href="#([a-zA-Z0-9-]+)"/g,(m,r)=>'href="'+pathOf(r)+'"')}
 
 function toast(msg){const t=document.createElement("div");t.className="toast";t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),2600)}
@@ -155,11 +155,12 @@ function header(){
   <header class="site2">
    <a class="brand" href="#home"><span class="glyph" aria-hidden="true"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="15" fill="none" stroke="var(--ink)" stroke-width="7"/><path d="M8 30 L30 9" stroke="var(--accent)" stroke-width="4"/></svg></span><span class="bt"><b>${esc(S.settings.company.toUpperCase())}</b><small>${esc(S.settings.tagline)}</small></span></a>
    <div class="bar">
-    <nav class="main" id="nav">${n.map(([r,l])=>r==="shop"
+    <nav class="main" id="nav"><div class="mob-acct mob-only"><a href="#account" class="mob-login"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg> ${session.user?"My account":"Login / Sign up"}</a>${session.admin?`<a href="#admin" class="mob-login alt">Admin panel</a>`:`<a href="#admin" class="mob-login alt">Staff login</a>`}</div>${n.map(([r,l])=>r==="shop"
       ?`<div class="dd"><a href="#shop" class="${on(r)?"act":""}">${l} <span aria-hidden="true">▾</span></a><div class="ddm">${S.categories.map(c=>`<div class="ddc"><a href="#cat-${c.id}">${esc(c.name)} <span aria-hidden="true">›</span></a><div class="dds">${c.subs.slice(0,8).map(s=>`<a href="#cat-${c.id}">${esc(s)}</a>`).join("")}</div></div>`).join("")}<a href="#shop"><b>All products</b></a></div></div>`
-      :`<a href="#${r}" class="${on(r)?"act":""}">${l}</a>`).join("")}<a href="#account" class="mob-only">${session.user?"My account":"Login"}</a></nav>
+      :`<a href="#${r}" class="${on(r)?"act":""}">${l}</a>`).join("")}</nav>
     <div class="hdr-actions">
      <a class="rfq-pill" href="#cart">RFQ <span class="ct">${S.cart.length}</span></a>
+     <a class="acct-btn" href="#account" aria-label="${session.user?"My account":"Login"}"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>${session.user?esc((session.user.name||"Account").split(" ")[0]):"Login"}</span></a>
      <a class="rq-btn" href="#rfq">Request quote</a>
      <button class="burger" data-act="burger" aria-label="Open menu">Menu</button>
     </div>
@@ -176,11 +177,11 @@ function footer(){
    <div><h5>Company</h5><a href="#about">About ${esc(s.company.split(" ")[0])}</a><a href="#manufacturing">Manufacturing</a><a href="#private-label">Private Label</a><a href="#markets">Global Markets</a><a href="#blog">Knowledge Center</a><a href="#contact">Contact</a></div>
    <div><h5>Categories</h5>${S.categories.map(c=>`<a href="#cat-${c.id}">${esc(c.name)}</a>`).join("")}</div>
    <div><h5>Product types</h5>${types.map(t=>`<a href="#shop">${esc(t)}</a>`).join("")}</div>
-   <div><h5>Production terms</h5><span class="f-line">MOQ 50 pieces</span><span class="f-line">Sampling 7–10 working days</span><span class="f-line">Bulk production 27–30 working days</span><span class="f-line">Private label ready</span><a href="#faq">FAQ</a><a href="#terms">Terms of business</a><a href="#privacy-policy">Privacy policy</a></div>
+   <div><h5>Production terms</h5><span class="f-line">MOQ 50 pieces</span><span class="f-line">Sampling 7–10 working days</span><span class="f-line">Bulk production 27–30 working days</span><span class="f-line">Private label ready</span><a href="#faq">FAQ</a><a href="#terms">Terms of business</a><a href="#privacy-policy">Privacy policy</a><a href="#account">Buyer login</a><a href="#admin">Staff login</a></div>
   </div>
   <div class="f-contact"><h5>Contact</h5><span style="user-select:all">✉ ${esc(s.email)}</span><span style="user-select:all">☎ ${esc(s.phone)}</span><span>⌖ ${esc(s.address)}</span>${s.hours?`<span>${esc(s.hours)}</span>`:""}</div>
-  <div class="bot"><span>© 2026 ${esc(s.company)}. All rights reserved.${s.scci?" · SCCI No. "+esc(s.scci):""}${s.ntn?" · NTN "+esc(s.ntn):""}</span><span class="f-soc">${[["instagram","Instagram"],["facebook","Facebook"],["linkedin","LinkedIn"]].filter(x=>s[x[0]]).map(x=>`<a href="${esc(s[x[0]])}" target="_blank" rel="noopener">${x[1]}</a>`).join("")}<a href="https://wa.me/${s.whatsapp.replace(/\D/g,"")}" target="_blank" rel="noopener">WhatsApp</a></span></div></div></footer>
-  <a class="wa" href="https://wa.me/${s.whatsapp.replace(/\D/g,"")}" target="_blank" rel="noopener">WhatsApp</a>`;
+  <div class="bot"><span>© 2026 ${esc(s.company)}. All rights reserved.${s.scci?" · SCCI No. "+esc(s.scci):""}${s.ntn?" · NTN "+esc(s.ntn):""}</span><span class="f-soc">${[["instagram","Instagram"],["facebook","Facebook"],["linkedin","LinkedIn"]].filter(x=>s[x[0]]).map(x=>`<a href="${esc(s[x[0]])}" target="_blank" rel="noopener">${x[1]}</a>`).join("")}<a href="https://wa.me/${waNum(s.whatsapp)}" target="_blank" rel="noopener">WhatsApp</a></span></div></div></footer>
+`;
 }
 const EYEBROW={shop:"Product catalogue — made to order","private-label":"Private label & customisation",manufacturing:"Manufacturing transparency",markets:"Global markets",about:"About the manufacturer",blog:"Knowledge center",contact:"Contact the production team",rfq:"Production brief",cart:"Request for quotation",faq:"Buyer questions","privacy-policy":"Legal",terms:"Legal",account:"Buyer account",admin:"Staff area"};
 const BANNER_PAGES=[["shop","Shop / catalogue"],["private-label","Private Label"],["manufacturing","Manufacturing"],["markets","Global Markets"],["about","About"],["blog","Knowledge Center"],["contact","Contact"],["rfq","Production brief"],["faq","FAQ"]];
@@ -207,9 +208,12 @@ const isWished=id=>{const u=curUser();return u&&u.wishlist.includes(id)};
 const curUser=()=>session.user&&S.users.find(u=>u.id===session.user.id);
 
 const QCSTEPS=[["Material Inspection","Fabric, trims and colour direction are reviewed before production moves forward."],["Construction Checks","Panels, seams, structure and build details are checked against the approved brief."],["Stitching Checks","Stitching consistency, alignment and finishing quality are reviewed during production."],["Print / Embroidery Inspection","Decoration placement, colour, density and finish are checked against the artwork."],["Measurement Checks","Sizing and grading are measured against your size specification."],["Final Garment Review","Every finished piece is checked for defects, loose threads and cleanliness."],["Packing Audit","Labels, folding, polybags and carton counts are verified before export."]];
+function waNum(n){let d=String(n||"").replace(/\D/g,"");if(d.startsWith("00"))d=d.slice(2);else if(d.startsWith("0"))d="92"+d.slice(1);return d}
 const FLAG=cc=>cc.toUpperCase().replace(/./g,ch=>String.fromCodePoint(127397+ch.charCodeAt(0)));
 function qcVisual(i){const c=S.content,im=(c.qcImages||[])[i];return im?`<img src="${esc(im)}" alt="">`:`<div class="qc-ph"><img src="${garment(["jersey","jacket","hoodie","polo","vest","tracksuit","pack"][i%7],"#2a2a28","#F26A1B",["front","close","side","front","back","front","front"][i%7])}" alt=""></div>`}
 const numWord=n=>["Zero","One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Eleven","Twelve"][n]||String(n);
+function heroLines(sents){const out=[];sents.forEach((s,i)=>{const w=s.split(" ");if(i>0&&w.length>2){out.push({t:w.slice(0,-1).join(" "),em:i===1});out.push({t:w[w.length-1],em:i===1})}else out.push({t:s,em:i===1})});return out}
+function countUp(){if(typeof document==="undefined")return;const els=document.querySelectorAll(".h-stats .cnt");if(!els.length)return;if(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches)return;const t0=performance.now(),D=1400;els.forEach(e=>e.textContent="0");(function step(t){const k=Math.min(1,(t-t0)/D),ease=1-Math.pow(1-k,3);els.forEach(e=>{e.textContent=Math.round(+e.dataset.to*ease)});if(k<1)requestAnimationFrame(step)})(t0)}
 function pgHome(){
   const c=S.content, s=S.settings, feat=S.products.filter(p=>p.featured&&p.active).slice(0,4);
   const kits=[S.products[0],S.products.find(p=>p.type==="hoodie"),S.products.find(p=>p.type==="puffer")].filter(Boolean);
@@ -225,9 +229,9 @@ function pgHome(){
   <section class="h-intro"><div class="wrap">
    <div class="dot-eyebrow">Sialkot, Pakistan — International apparel manufacturing</div>
    ${s.since?`<span class="cred-chip"><b>Since ${esc(s.since)}</b> · Manufacturing credentials</span>`:`<span class="cred-chip"><b>Export ready</b> · Manufacturing credentials</span>`}
-   <h1 class="h-display">${words.map((w,i)=>i===1?`<em>${esc(w)}</em>`:esc(w)).join("<br>")}</h1>
+   <h1 class="h-display">${heroLines(words).map((l,i)=>`<span class="hl ${i%2?"from-r":"from-l"}" style="animation-delay:${.1+i*.18}s">${l.em?`<em>${esc(l.t)}</em>`:esc(l.t)}</span>`).join("")}</h1>
    <div class="h-tag">Sampling 7–10 working days</div>
-   <div class="h-stats"><div><span>MOQ</span><b>50<small>pcs</small></b><i>Minimum pieces</i></div><div><span>Sample time</span><b>7–10<small>days</small></b><i>Working days</i></div><div><span>Bulk time</span><b>27–30<small>days</small></b><i>Working days</i></div></div>
+   <div class="h-stats"><div><span>MOQ</span><b><i class="cnt" data-to="50">50</i><small>pcs</small></b><i>Minimum pieces</i></div><div><span>Sample time</span><b><i class="cnt" data-to="7">7</i>–<i class="cnt" data-to="10">10</i><small>days</small></b><i>Working days</i></div><div><span>Bulk time</span><b><i class="cnt" data-to="27">27</i>–<i class="cnt" data-to="30">30</i><small>days</small></b><i>Working days</i></div></div>
    <p class="h-lead">${esc(c.heroSub)}</p>
    <div class="h-ctas"><a class="pill-btn" href="#rfq">Start your production brief →</a><a class="text-btn" href="#shop">Explore products →</a></div>
   </div></section>
@@ -261,6 +265,7 @@ function pgHome(){
 
   ${S.testimonials.length?`<section><div class="wrap"><div class="h-head"><h2 class="h-h2 plain">What buyers say</h2></div><div class="grid g3">${S.testimonials.map(t=>`<blockquote class="quote" style="margin:0"><p>${esc(t.text)}</p><cite><b>${esc(t.name)}</b> · ${esc(t.role)}</cite></blockquote>`).join("")}</div></div></section>`:""}
 
+  ${contactBlock()}
   <section class="h-guides"><div class="wrap"><div class="h-head"><div><div class="dot-eyebrow">Knowledge center</div><h2 class="h-h2 plain">Buyer guides on sourcing, fabrics and production.</h2></div><a class="text-btn" href="#blog">All guides →</a></div>
    <div class="grid g3">${S.posts.slice(0,3).map(postCard).join("")}</div></div></section>`;
 }
@@ -286,7 +291,7 @@ function pgShop(){
    ${list.length?`<div class="grid g4">${list.map(prodCard).join("")}</div>`:`<div class="empty">No products in this ${ui.shopSub?"subcategory":"category"} yet. <a href="#rfq">Send a brief</a> and we will develop it for you.</div>`}
   </div></section>${ctaCard()}`;
 }
-function ctaCard(){const s=S.settings,co=s.company.split(" ")[0];return `<section class="cta-wrap"><div class="wrap"><div class="cta-card"><div><div class="pb-eb">Request quote / production brief</div><h2>Ready to brief your next ${esc(co)} apparel range?</h2><p>Share product type, quantity, customisation and target delivery. ${esc(co)} replies with the next production step.</p></div><div class="cta-acts"><a class="pill-btn" href="#rfq">Request quote →</a><a class="text-btn light" href="https://wa.me/${s.whatsapp.replace(/\D/g,"")}" target="_blank" rel="noopener">WhatsApp →</a></div></div></div></section>`}
+function ctaCard(){const s=S.settings,co=s.company.split(" ")[0];return `<section class="cta-wrap"><div class="wrap"><div class="cta-card"><div><div class="pb-eb">Request quote / production brief</div><h2>Ready to brief your next ${esc(co)} apparel range?</h2><p>Share product type, quantity, customisation and target delivery. ${esc(co)} replies with the next production step.</p></div><div class="cta-acts"><a class="pill-btn" href="#rfq">Request quote →</a><a class="text-btn light" href="https://wa.me/${waNum(s.whatsapp)}" target="_blank" rel="noopener">WhatsApp →</a></div></div></div></section>`}
 
 function pgProduct(id){
   const p=prod(id); if(!p||!p.active) return phead("Product not found","This product is no longer listed.")+`<section><div class="wrap"><a class="btn" href="#shop">Back to catalogue</a></div></section>`;
@@ -365,9 +370,27 @@ function pgPost(id){
   return phead(esc(p.title),`${esc(p.cat)} · ${p.mins} min read · ${fdate(p.date)} · ${esc(p.author)}`,`<a href="#home">Home</a> / <a href="#blog">Knowledge Center</a>`)+
   `<section><div class="wrap"><div class="prose">${p.body.split("\n\n").map(x=>`<p>${esc(x)}</p>`).join("")}<div style="margin-top:28px;display:flex;gap:10px;flex-wrap:wrap"><a class="btn pri" href="#rfq">Start a production brief</a><a class="btn" href="#blog">More guides</a></div></div></div></section>`;
 }
+const IC={
+ mail:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>',
+ wa:'<svg viewBox="0 0 32 32" width="20" height="20"><path fill="currentColor" d="M16 3.5A12.4 12.4 0 0 0 5.3 22.2L3.6 28.4l6.4-1.7A12.4 12.4 0 1 0 16 3.5zm5.6 14.9c-.3-.2-1.8-.9-2.1-1s-.5-.2-.7.2-.8 1-1 1.2-.4.2-.7 0a8.3 8.3 0 0 1-2.4-1.5 9.1 9.1 0 0 1-1.7-2.1c-.2-.3 0-.5.1-.6l.5-.6.3-.5a.6.6 0 0 0 0-.5l-.9-2.3c-.3-.6-.5-.5-.7-.5h-.6a1.2 1.2 0 0 0-.9.4 3.6 3.6 0 0 0-1.1 2.7 6.3 6.3 0 0 0 1.3 3.3 14.3 14.3 0 0 0 5.5 4.8c2 .9 2.8.9 3.8.8a3.2 3.2 0 0 0 2.1-1.5 2.6 2.6 0 0 0 .2-1.5c-.1-.2-.3-.3-.6-.4z"/></svg>',
+ phone:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg>',
+ pin:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s-7-6.2-7-12a7 7 0 0 1 14 0c0 5.8-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/></svg>',
+ ig:'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>',
+ fb:'<svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M14 8h3V4h-3a4 4 0 0 0-4 4v2H8v4h2v7h4v-7h3l1-4h-4V8.5c0-.3.2-.5.5-.5z"/></svg>',
+ li:'<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M4 9h4v11H4zM6 3a2 2 0 1 1 0 4 2 2 0 0 1 0-4zm4 6h4v1.6c.6-1 1.9-1.9 3.7-1.9C20 8.7 21 10.3 21 13v7h-4v-6c0-1.5-.5-2.4-1.8-2.4S13 12.6 13 14v6h-3z"/></svg>'
+};
+function contactBlock(){
+  const s=S.settings, wa="https://wa.me/"+waNum(s.whatsapp), tel="tel:"+String(s.phone).replace(/[^\d+]/g,"");
+  const card=(ic,label,val,href,ext)=>`<a class="cd-card" href="${esc(href)}" ${ext?'target="_blank" rel="noopener"':""}><span class="cd-ic">${ic}</span><span class="cd-l">${label}</span><span class="cd-v">${esc(val)}</span></a>`;
+  const soc=[[wa,IC.wa,"WhatsApp",1],s.instagram&&[s.instagram,IC.ig,"Instagram",1],s.facebook&&[s.facebook,IC.fb,"Facebook",1],s.linkedin&&[s.linkedin,IC.li,"LinkedIn",1],["mailto:"+s.email,IC.mail,"Email",0]].filter(Boolean);
+  return `<section class="cd-sec"><div class="wrap"><div class="dot-eyebrow">Contact details</div><h2 class="cd-h">Reach us directly.</h2>
+   <div class="cd-grid">${card(IC.mail,"Email",s.email,"mailto:"+s.email)}${card(IC.wa,"WhatsApp",s.whatsapp,wa,1)}${card(IC.phone,"Phone",s.phone,tel)}${card(IC.pin,"Manufacturing location",s.address.replace(/,\s*Punjab/i,""),"https://maps.google.com/?q="+encodeURIComponent(s.company+" "+s.address),1)}</div>
+   <div class="cd-soc">${soc.map(x=>`<a href="${esc(x[0])}" ${x[3]?'target="_blank" rel="noopener"':""} aria-label="${x[2]}" title="${x[2]}">${x[1]}</a>`).join("")}</div>
+  </div></section>`;
+}
 function pgContact(){
   const s=S.settings;
-  return phead("Talk to the team that <em>makes your product.</em>","Share your sport, quantities and delivery date. A production specialist replies within one working day.")+
+  return phead("Talk to the team that <em>makes your product.</em>","Share your sport, quantities and delivery date. A production specialist replies within one working day.")+contactBlock()+
   `<section><div class="wrap"><div class="grid g2" style="gap:32px">
    <div class="panel"><h3 style="font-size:30px;margin-bottom:16px">Send us a message</h3><form class="form" id="contactForm" novalidate>
     <div class="f2"><div class="field"><label for="c_name">Full name *</label><input id="c_name" required value="${esc(session.user?session.user.name:"")}"></div><div class="field"><label for="c_email">Email *</label><input id="c_email" type="email" required value="${esc(session.user?session.user.email:"")}"></div></div>
@@ -402,7 +425,7 @@ function pgCart(){
   return phead("Your <em>RFQ cart.</em>","Collect products, set quantities and send them as one production brief.")+
   `<section><div class="wrap">${S.cart.length?`<div class="tbl-wrap"><table class="t"><thead><tr><th></th><th>Product</th><th>Qty</th><th>Sizes</th><th>Colour</th><th>Notes</th><th></th></tr></thead><tbody>${S.cart.map((it,i)=>{const p=prod(it.pid);if(!p)return"";return `<tr><td><img class="thumb" src="${pimg(p)}" alt=""></td><td><b>${esc(p.name)}</b><br><span class="mono muted">${esc(p.sku)}</span></td><td><input data-cart="${i}" data-f="qty" type="number" min="${p.moq}" value="${it.qty}" style="width:80px;padding:6px;border:1px solid var(--line);border-radius:4px;background:var(--surface)"></td><td><input data-cart="${i}" data-f="size" value="${esc(it.size)}" style="width:100px;padding:6px;border:1px solid var(--line);border-radius:4px;background:var(--surface)"></td><td><select data-cart="${i}" data-f="color" style="padding:6px;border:1px solid var(--line);border-radius:4px;background:var(--surface)">${p.colors.map(c=>`<option ${c===it.color?"selected":""}>${esc(c)}</option>`).join("")}</select></td><td><input data-cart="${i}" data-f="note" value="${esc(it.note)}" placeholder="Logo, names…" style="width:150px;padding:6px;border:1px solid var(--line);border-radius:4px;background:var(--surface)"></td><td><button class="btn sm danger" data-act="cartrm" data-i="${i}">Remove</button></td></tr>`}).join("")}</tbody></table></div>
    <p class="mono muted" style="margin-top:10px">Total ${S.cart.reduce((a,b)=>a+ +b.qty,0)} pcs · MOQ ${50} per design / colour</p>
-   <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap"><button class="btn pri" data-act="cartsubmit">Submit as production brief</button><a class="btn" href="https://wa.me/${S.settings.whatsapp.replace(/\D/g,"")}?text=${encodeURIComponent("RFQ: "+S.cart.map(it=>(prod(it.pid)||{}).sku+" x"+it.qty).join(", "))}" target="_blank" rel="noopener">Send on WhatsApp</a><a class="btn ghost" href="#shop">Add more products</a></div>`
+   <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap"><button class="btn pri" data-act="cartsubmit">Submit as production brief</button><a class="btn" href="https://wa.me/${waNum(S.settings.whatsapp)}?text=${encodeURIComponent("RFQ: "+S.cart.map(it=>(prod(it.pid)||{}).sku+" x"+it.qty).join(", "))}" target="_blank" rel="noopener">Send on WhatsApp</a><a class="btn ghost" href="#shop">Add more products</a></div>`
    :`<div class="empty"><h3 style="font-size:32px;margin-bottom:8px">Your RFQ cart is empty</h3><p>Add products from the catalogue to request one combined quote.</p><a class="btn pri" href="#shop" style="margin-top:16px">Explore products</a></div>`}</div></section>`;
 }
 function pgLegal(kind){
@@ -591,7 +614,7 @@ function pageHTML(){
 }
 const EYE='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>',EYE_OFF='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3l18 18M10.6 5.1A10 10 0 0 1 12 5c6.5 0 10 7 10 7a17 17 0 0 1-3.3 4.2M6.6 6.6A17 17 0 0 0 2 12s3.5 7 10 7a10 10 0 0 0 4.4-1"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>';
 function addPwToggles(){document.querySelectorAll('input[type="password"]:not([data-pw])').forEach(inp=>{inp.dataset.pw="1";const w=document.createElement("span");w.className="pw-wrap";inp.parentNode.insertBefore(w,inp);w.appendChild(inp);const b=document.createElement("button");b.type="button";b.className="pw-eye";b.dataset.act="pwtoggle";b.setAttribute("aria-label","Show password");b.innerHTML=EYE;w.appendChild(b)})}
-function render(){$("#app").innerHTML=pageHTML();addPwToggles();document.title=titleOf(route);save()}
+function render(){$("#app").innerHTML=pageHTML();addPwToggles();drawChat();if(route==="home")countUp();document.title=titleOf(route);save()}
 function titleOf(r){const s=S.settings;if(r==="home")return s.metaTitle;if(r.startsWith("product-")){const p=prod(r.slice(8));return p?p.name+" | "+s.company:s.company}if(r.startsWith("post-")){const p=S.posts.find(x=>x.id===r.slice(5));return p?p.title+" | "+s.company:s.company}if(r.startsWith("cat-")){const c=catOf(r.slice(4));return c?"Custom "+c.name+" Manufacturer | "+s.company:s.company}const t={shop:"Product Catalogue","private-label":"Private Label Clothing Manufacturer",manufacturing:"Manufacturing Process",markets:"Export Markets",about:"About Us",blog:"Knowledge Center",contact:"Contact",rfq:"Request a Quote",cart:"RFQ Cart","privacy-policy":"Privacy Policy",terms:"Terms of Business",faq:"FAQ",account:"Buyer Account",admin:"Admin"}[r];return (t||"Page not found")+" | "+s.company}
 function descOf(r){const s=S.settings;if(r.startsWith("product-")){const p=prod(r.slice(8));if(p)return p.desc+" MOQ "+p.moq+" pcs, sample in "+p.sample+" working days. Made in Sialkot by "+s.company+"."}if(r.startsWith("post-")){const p=S.posts.find(x=>x.id===r.slice(5));if(p)return p.body.split("\n")[0].slice(0,155)}if(r.startsWith("cat-")){const c=catOf(r.slice(4));if(c)return c.blurb+" MOQ 50 pieces. Made in Sialkot, Pakistan."}return s.metaDesc}
 
@@ -783,7 +806,7 @@ async function upImg(file,max=900){const d=await readImg(file,max);if(!LIVE.sb)r
 if(typeof document!=="undefined"){
   window.addEventListener("popstate",()=>{setRoute(routeOf(location.pathname));render()});
   document.addEventListener("click",e=>{const a=e.target.closest("a[href^='/']");if(!a||a.target||e.metaKey||e.ctrlKey||e.target.closest("[data-act]"))return;e.preventDefault();go(routeOf(a.getAttribute("href")))},true);
-  (async function boot(){
+  setTimeout(async function boot(){
     const B=window.__BOOT__||{};
     if(B.rows)applyDocs(B.rows);
     setRoute(routeOf(location.pathname));
@@ -804,9 +827,18 @@ if(typeof document!=="undefined"){
       liveBaseline();
     }
     render();
-  })();
+  },0);
 }
 if(typeof module!=="undefined"){module.exports={
+  knowledge(rows){load();applyDocs(rows);const s=S.settings;return [
+   `Company: ${s.company}, custom sportswear, teamwear and private-label apparel manufacturer in ${s.address}. Exports to UK, USA, Germany, France, Netherlands, UAE, Canada, Australia.`,
+   `Contact: email ${s.email}, WhatsApp/phone ${s.whatsapp}. Website pages: /shop, /private-label, /manufacturing, /markets, /about, /blog, /contact, /rfq (production brief / quote form), /faq.`,
+   `Terms: MOQ 50 pieces per design and colour (sizes can be mixed). Sampling 7–10 working days after artwork approval. Bulk 27–30 working days after sample approval and deposit. Shipping EXW, FOB or DDP by air or sea. Prices are quoted per program; never invent prices.`,
+   `Customisation: ${METHODS.map(m=>m[1]).join(", ")}.`,
+   `Quality control steps: ${QCSTEPS.map(q=>q[0]).join(", ")}.`,
+   `Categories: ${S.categories.map(c=>`${c.name} (/shop/${c.id}): ${c.blurb} Subcategories: ${c.subs.join(", ")}`).join(" | ")}`,
+   `Products: ${S.products.filter(p=>p.active).map(p=>`${p.name} [${p.sku}] /product/${p.id} — ${p.sub}, ${p.gsm?p.gsm+" GSM, ":""}${p.comp}, colours ${p.colors.join("/")}`).join(" | ")}`
+  ].join("\n")},
   seedDocs(){const o={};o["site/config"]={settings:SEED.settings,content:SEED.content,categories:SEED.categories,testimonials:[],media:[]};SEED.products.forEach((p,i)=>o["products/"+p.id]={...p,pos:i,views:0});SEED.posts.forEach(p=>o["posts/"+p.id]=p);return o},
   renderRoute(path,rows,query){load();session={admin:false,user:null};Object.assign(ui,{shopSub:"",shopQ:"",blogCat:null,market:null,rfqStep:1,rfq:{}});applyDocs(rows);setRoute(routeOf(path));if(query&&query.q)ui.shopQ=String(query.q);return pageHTML()},
   meta(path,rows){load();applyDocs(rows);const r=routeOf(path);setRoute(r);let img=null;if(r.startsWith("product-")){const p=prod(r.slice(8));if(p&&p.images&&p.images[0]&&/^https?:/.test(p.images[0]))img=p.images[0]}
@@ -816,3 +848,68 @@ if(typeof module!=="undefined"){module.exports={
   org(rows){load();applyDocs(rows);const s=S.settings;return {"@context":"https://schema.org","@type":"Organization",name:s.company,email:s.email,telephone:s.phone,foundingDate:s.since,address:{"@type":"PostalAddress",addressLocality:"Sialkot",addressCountry:"PK"},sameAs:[s.instagram,s.facebook,s.linkedin].filter(Boolean)}},
   product(path,rows){load();applyDocs(rows);const r=routeOf(path);if(!r.startsWith("product-"))return null;const p=prod(r.slice(8));if(!p)return null;return {"@context":"https://schema.org","@type":"Product",name:p.name,sku:p.sku,description:p.desc,brand:{"@type":"Brand",name:S.settings.company},material:p.comp,color:p.colors.join(", ")}}
 }}
+
+
+/* ============ WhatsApp + AI assistant ============ */
+const WA_SVG='<svg viewBox="0 0 32 32" width="30" height="30" aria-hidden="true"><path fill="#fff" d="M16 3.5A12.4 12.4 0 0 0 5.3 22.2L3.6 28.4l6.4-1.7A12.4 12.4 0 1 0 16 3.5zm0 22.6a10.2 10.2 0 0 1-5.2-1.4l-.4-.2-3.8 1 1-3.7-.2-.4A10.2 10.2 0 1 1 16 26.1z"/><path fill="#fff" d="M21.6 18.4c-.3-.2-1.8-.9-2.1-1s-.5-.2-.7.2-.8 1-1 1.2-.4.2-.7 0a8.3 8.3 0 0 1-2.4-1.5 9.1 9.1 0 0 1-1.7-2.1c-.2-.3 0-.5.1-.6l.5-.6.3-.5a.6.6 0 0 0 0-.5l-.9-2.3c-.3-.6-.5-.5-.7-.5h-.6a1.2 1.2 0 0 0-.9.4 3.6 3.6 0 0 0-1.1 2.7 6.3 6.3 0 0 0 1.3 3.3 14.3 14.3 0 0 0 5.5 4.8c2 .9 2.8.9 3.8.8a3.2 3.2 0 0 0 2.1-1.5 2.6 2.6 0 0 0 .2-1.5c-.1-.2-.3-.3-.6-.4z"/></svg>';
+const BOT_SVG='<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#fff" stroke-width="1.8" aria-hidden="true"><rect x="4" y="7" width="16" height="12" rx="4"/><path d="M12 3v4M8.5 12.5h.01M15.5 12.5h.01M9 16h6"/><circle cx="12" cy="3" r="1" fill="#fff"/></svg>';
+var CHAT={open:false,busy:false,msgs:[]};
+function chatWelcome(){const co=S.settings.company;return `Hi, I'm the ${co} assistant. I can help with products, MOQ, sampling time, customisation and how to send a quote request. What are you planning to make?`}
+function chatUI(){
+  const s=S.settings, wa="https://wa.me/"+waNum(s.whatsapp);
+  const msgs=CHAT.msgs.length?CHAT.msgs:[{role:"assistant",content:chatWelcome()}];
+  const fmt=t=>esc(t).replace(/\[([^\]]+)\]\((\/[^)\s]*)\)/g,'<a href="$2">$1</a>').replace(/\*\*([^*]+)\*\*/g,"<b>$1</b>").replace(/\n/g,"<br>");
+  return `<div class="fab-col">
+   ${CHAT.open?`<div class="chat-panel" role="dialog" aria-label="${esc(s.company)} assistant">
+    <div class="chat-top"><span class="chat-av">${BOT_SVG}</span><div><b>${esc(s.company)} Assistant</b><small>${CHAT.busy?"Typing…":"Replies instantly · AI"}</small></div><button class="chat-x" data-act="chatclose" aria-label="Close chat">✕</button></div>
+    <div class="chat-body" id="chatBody">${msgs.map(m=>`<div class="cm ${m.role==="user"?"u":"a"}">${fmt(m.content)}</div>`).join("")}${CHAT.busy?'<div class="cm a typing"><i></i><i></i><i></i></div>':""}</div>
+    ${CHAT.msgs.length<2?`<div class="chat-sugg">${["What is your MOQ?","How long does sampling take?","Do you make private label?","How do I get a quote?"].map(q=>`<button data-act="chatq" data-q="${esc(q)}">${esc(q)}</button>`).join("")}</div>`:""}
+    <form class="chat-form" id="chatForm"><input id="chatIn" autocomplete="off" placeholder="Ask about products, MOQ, delivery…" maxlength="500" ${CHAT.busy?"disabled":""}><button ${CHAT.busy?"disabled":""} aria-label="Send">➤</button></form>
+    <div class="chat-foot"><a href="${wa}" target="_blank" rel="noopener">Talk to a person on WhatsApp</a> · <a href="/rfq">Send a brief</a></div>
+   </div>`:""}
+   <button class="fab fab-ai" data-act="chattoggle" aria-label="${CHAT.open?"Close":"Open"} AI assistant">${CHAT.open?'<span style="font-size:22px;color:#fff">✕</span>':BOT_SVG}<span class="fab-tip">Ask AI</span></button>
+   <a class="fab fab-wa" href="${wa}" target="_blank" rel="noopener" aria-label="Chat on WhatsApp">${WA_SVG}<span class="fab-tip">WhatsApp</span></a>
+  </div>`;
+}
+function drawChat(){if(typeof document==="undefined")return;let r=document.getElementById("chat-root");if(!r){r=document.createElement("div");r.id="chat-root";document.body.appendChild(r)}if(route==="admin"&&session.admin){r.innerHTML="";return}const had=document.activeElement&&document.activeElement.id==="chatIn";r.innerHTML=chatUI();const b=document.getElementById("chatBody");if(b)b.scrollTop=b.scrollHeight;if(CHAT.open&&!CHAT.busy){const i=document.getElementById("chatIn");if(i&&(had||CHAT.focus)){i.focus();CHAT.focus=false}}}
+/* answers without the AI server, from the site's own data */
+function localAnswer(q){
+  const t=q.toLowerCase(), s=S.settings, co=s.company;
+  const has=(...w)=>w.some(x=>t.includes(x));
+  if(has("moq","minimum","kam se kam","kitne piece","how many")) return `Our MOQ is **50 pieces per design and colour**. You can mix sizes freely inside that quantity.`;
+  if(has("sample","sampling","namuna")) return `Samples take **7–10 working days** after your artwork and brief are confirmed. Sample cost is quoted with your brief.`;
+  if(has("bulk","production time","lead time","delivery","kitne din","how long","time")) return `Bulk production takes **27–30 working days** after sample approval and deposit. Shipping is by air or sea, EXW, FOB or DDP.`;
+  if(has("price","cost","rate","qeemat","kitne ka","quote","quotation")) return `Every order is custom, so prices depend on fabric, decoration and quantity. Send a [production brief](/rfq) (about 3 minutes) and the team replies within one working day.`;
+  if(has("private label","own brand","my brand","label","brand")) return `Yes. ${co} develops apparel under your brand: woven labels, hangtags, patches and custom packaging. See [Private Label](/private-label) or [start a brief](/rfq).`;
+  if(has("ship","country","export","uk","usa","europe","dubai","australia","canada")) return `${co} ships worldwide by air or sea. Main markets are the UK, USA, Germany, France, Netherlands, UAE, Canada and Australia.`;
+  if(has("print","sublimation","embroider","logo","custom")) return `Customisation options: sublimation, screen printing, heat transfer, embroidery, woven labels, hangtags, rubber/PVC patches and custom packaging.`;
+  if(has("contact","phone","email","whatsapp","number","call")) return `Email **${s.email}**, WhatsApp **${s.whatsapp}**. You can also use the [contact form](/contact).`;
+  if(has("size","sizing","chart")) return `Every product page has a size guide. Youth and women's grading are available, made to your size specification.`;
+  const words=t.split(/[^a-z0-9]+/).filter(w=>w.length>2);
+  const hits=S.products.filter(p=>p.active).map(p=>({p,sc:words.filter(w=>(p.name+" "+p.sub+" "+p.cat).toLowerCase().includes(w)).length})).filter(x=>x.sc).sort((a,b)=>b.sc-a.sc).slice(0,3);
+  const cat=S.categories.find(c=>words.some(w=>c.name.toLowerCase().includes(w)));
+  if(hits.length) return `Here are matching products:\n${hits.map(h=>`• [${h.p.name}](/product/${h.p.id}): ${h.p.gsm?h.p.gsm+" GSM, ":""}MOQ ${h.p.moq} pcs`).join("\n")}\nAdd them to your RFQ cart or [send a brief](/rfq).`;
+  if(cat) return `${cat.name}: ${cat.blurb} [Browse ${cat.name}](/shop/${cat.id}).`;
+  return `I can help with products, MOQ (50 pcs), sampling (7–10 days), bulk (27–30 days), customisation and shipping. For anything specific, [send a brief](/rfq) or message the team on WhatsApp.`;
+}
+async function chatSend(q){
+  q=String(q||"").trim(); if(!q||CHAT.busy)return;
+  CHAT.msgs.push({role:"user",content:q}); CHAT.busy=true; drawChat();
+  let a="";
+  try{
+    const r=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({messages:CHAT.msgs.slice(-12)})});
+    const d=await r.json().catch(()=>({}));
+    a=(r.ok&&d.reply)?d.reply:"";
+  }catch(e){}
+  if(!a)a=localAnswer(q);
+  CHAT.msgs.push({role:"assistant",content:a}); CHAT.busy=false; CHAT.focus=true; drawChat();
+}
+if(typeof document!=="undefined"){
+  document.addEventListener("click",e=>{const el=e.target.closest("#chat-root [data-act]");if(!el)return;const a=el.dataset.act;
+    if(a==="chattoggle"){CHAT.open=!CHAT.open;CHAT.focus=CHAT.open;drawChat()}
+    if(a==="chatclose"){CHAT.open=false;drawChat()}
+    if(a==="chatq")chatSend(el.dataset.q);
+  });
+  document.addEventListener("submit",e=>{if(e.target.id!=="chatForm")return;e.preventDefault();e.stopPropagation();const i=document.getElementById("chatIn");chatSend(i.value)},true);
+  document.addEventListener("click",e=>{const a=e.target.closest("#chat-root a[href^='/']");if(a&&!e.metaKey&&!e.ctrlKey){e.preventDefault();e.stopPropagation();go(routeOf(a.getAttribute("href")))}},true);
+}
