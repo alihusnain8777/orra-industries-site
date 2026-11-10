@@ -701,3 +701,21 @@ header.site2 nav.main>a,header.site2 .dd>a{padding-top:8px;padding-bottom:8px}
 .rq-btn{padding:10px 18px;font-size:14px}
 .rfq-pill{padding:7px 14px}
 @media (min-width:1291px){header.site2 nav.main{padding:0!important}}
+
+/* ===== login button + mobile menu fixes ===== */
+.acct-btn{display:inline-flex;align-items:center;gap:7px;color:#fff;text-decoration:none;border:1px solid rgba(255,255,255,.65);border-radius:30px;padding:8px 14px;font-weight:700;font-size:14px;white-space:nowrap}
+.acct-btn:hover{background:rgba(0,0,0,.1)}
+.mob-acct{display:none}
+@media (max-width:1290px){
+ header.site2 nav.main{max-height:calc(100vh - 110px);max-height:calc(100dvh - 110px);overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding-bottom:calc(24px + env(safe-area-inset-bottom,0px))}
+ header.site2 .mob-acct{display:flex!important;gap:8px;flex-wrap:wrap;padding:6px 0 12px;border-bottom:1px solid rgba(255,255,255,.3);margin-bottom:6px}
+ header.site2 .mob-login{display:inline-flex!important;align-items:center;gap:8px;background:#171717;color:#fff!important;border-radius:30px;padding:10px 16px!important;font-weight:700}
+ header.site2 .mob-login.alt{background:transparent;border:1px solid rgba(255,255,255,.7)}
+ header.site2 .mob-login::after{display:none}
+ header.site2 .ddm{display:grid!important;grid-template-columns:1fr 1fr;gap:0 8px;padding:0 0 6px 12px!important;width:auto!important;min-height:0!important}
+ header.site2 .ddc{width:auto!important}
+ header.site2 .ddm a,header.site2 .ddc>a{color:#fff!important;font-size:14px!important;padding:7px 0!important;font-weight:500!important;background:none!important}
+ header.site2 .ddc>a span{display:none}
+ header.site2 .ddm>a{grid-column:1/-1;border:0!important;width:auto!important}
+}
+@media (max-width:600px){.acct-btn{padding:8px 10px}.acct-btn span{display:none}}

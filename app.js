@@ -140,7 +140,7 @@ let route="home", ui={shopCat:"all",shopSub:"",shopQ:"",pcolor:null,pimg:0,ptab:
 function pathOf(r){if(!r||r==="home")return"/";if(r.startsWith("product-"))return"/product/"+r.slice(8);if(r.startsWith("post-"))return"/blog/"+r.slice(5);if(r.startsWith("cat-"))return"/shop/"+r.slice(4);return"/"+r}
 function routeOf(p){p=(p||"/").replace(/\/+$/,"")||"/";if(p==="/")return"home";let m;if(m=p.match(/^\/product\/(.+)/))return"product-"+m[1];if(m=p.match(/^\/blog\/(.+)/))return"post-"+m[1];if(m=p.match(/^\/shop\/(.+)/))return"cat-"+m[1];return p.slice(1)}
 function setRoute(r){route=r;ui.pcolor=null;ui.pimg=0;ui.ptab="overview";if(r.startsWith("cat-")){ui.shopCat=r.slice(4);ui.shopSub=""}else if(r==="shop"){ui.shopCat="all"}}
-function go(r){const p=pathOf(r);if(location.pathname!==p)history.pushState({},"",p);setRoute(r);render();window.scrollTo(0,0)}
+function go(r){const nv=typeof document!=="undefined"&&document.getElementById("nav");if(nv)nv.classList.remove("open");const p=pathOf(r);if(location.pathname!==p)history.pushState({},"",p);setRoute(r);render();window.scrollTo(0,0)}
 function linkify(h){return h.replace(/href="#([a-zA-Z0-9-]+)"/g,(m,r)=>'href="'+pathOf(r)+'"')}
 
 function toast(msg){const t=document.createElement("div");t.className="toast";t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),2600)}
@@ -155,11 +155,12 @@ function header(){
   <header class="site2">
    <a class="brand" href="#home"><span class="glyph" aria-hidden="true"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="15" fill="none" stroke="var(--ink)" stroke-width="7"/><path d="M8 30 L30 9" stroke="var(--accent)" stroke-width="4"/></svg></span><span class="bt"><b>${esc(S.settings.company.toUpperCase())}</b><small>${esc(S.settings.tagline)}</small></span></a>
    <div class="bar">
-    <nav class="main" id="nav">${n.map(([r,l])=>r==="shop"
+    <nav class="main" id="nav"><div class="mob-acct mob-only"><a href="#account" class="mob-login"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg> ${session.user?"My account":"Login / Sign up"}</a>${session.admin?`<a href="#admin" class="mob-login alt">Admin panel</a>`:`<a href="#admin" class="mob-login alt">Staff login</a>`}</div>${n.map(([r,l])=>r==="shop"
       ?`<div class="dd"><a href="#shop" class="${on(r)?"act":""}">${l} <span aria-hidden="true">▾</span></a><div class="ddm">${S.categories.map(c=>`<div class="ddc"><a href="#cat-${c.id}">${esc(c.name)} <span aria-hidden="true">›</span></a><div class="dds">${c.subs.slice(0,8).map(s=>`<a href="#cat-${c.id}">${esc(s)}</a>`).join("")}</div></div>`).join("")}<a href="#shop"><b>All products</b></a></div></div>`
-      :`<a href="#${r}" class="${on(r)?"act":""}">${l}</a>`).join("")}<a href="#account" class="mob-only">${session.user?"My account":"Login"}</a></nav>
+      :`<a href="#${r}" class="${on(r)?"act":""}">${l}</a>`).join("")}</nav>
     <div class="hdr-actions">
      <a class="rfq-pill" href="#cart">RFQ <span class="ct">${S.cart.length}</span></a>
+     <a class="acct-btn" href="#account" aria-label="${session.user?"My account":"Login"}"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>${session.user?esc((session.user.name||"Account").split(" ")[0]):"Login"}</span></a>
      <a class="rq-btn" href="#rfq">Request quote</a>
      <button class="burger" data-act="burger" aria-label="Open menu">Menu</button>
     </div>
@@ -176,7 +177,7 @@ function footer(){
    <div><h5>Company</h5><a href="#about">About ${esc(s.company.split(" ")[0])}</a><a href="#manufacturing">Manufacturing</a><a href="#private-label">Private Label</a><a href="#markets">Global Markets</a><a href="#blog">Knowledge Center</a><a href="#contact">Contact</a></div>
    <div><h5>Categories</h5>${S.categories.map(c=>`<a href="#cat-${c.id}">${esc(c.name)}</a>`).join("")}</div>
    <div><h5>Product types</h5>${types.map(t=>`<a href="#shop">${esc(t)}</a>`).join("")}</div>
-   <div><h5>Production terms</h5><span class="f-line">MOQ 50 pieces</span><span class="f-line">Sampling 7–10 working days</span><span class="f-line">Bulk production 27–30 working days</span><span class="f-line">Private label ready</span><a href="#faq">FAQ</a><a href="#terms">Terms of business</a><a href="#privacy-policy">Privacy policy</a></div>
+   <div><h5>Production terms</h5><span class="f-line">MOQ 50 pieces</span><span class="f-line">Sampling 7–10 working days</span><span class="f-line">Bulk production 27–30 working days</span><span class="f-line">Private label ready</span><a href="#faq">FAQ</a><a href="#terms">Terms of business</a><a href="#privacy-policy">Privacy policy</a><a href="#account">Buyer login</a><a href="#admin">Staff login</a></div>
   </div>
   <div class="f-contact"><h5>Contact</h5><span style="user-select:all">✉ ${esc(s.email)}</span><span style="user-select:all">☎ ${esc(s.phone)}</span><span>⌖ ${esc(s.address)}</span>${s.hours?`<span>${esc(s.hours)}</span>`:""}</div>
   <div class="bot"><span>© 2026 ${esc(s.company)}. All rights reserved.${s.scci?" · SCCI No. "+esc(s.scci):""}${s.ntn?" · NTN "+esc(s.ntn):""}</span><span class="f-soc">${[["instagram","Instagram"],["facebook","Facebook"],["linkedin","LinkedIn"]].filter(x=>s[x[0]]).map(x=>`<a href="${esc(s[x[0]])}" target="_blank" rel="noopener">${x[1]}</a>`).join("")}<a href="https://wa.me/${waNum(s.whatsapp)}" target="_blank" rel="noopener">WhatsApp</a></span></div></div></footer>
