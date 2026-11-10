@@ -208,6 +208,14 @@ const isWished=id=>{const u=curUser();return u&&u.wishlist.includes(id)};
 const curUser=()=>session.user&&S.users.find(u=>u.id===session.user.id);
 
 const QCSTEPS=[["Material Inspection","Fabric, trims and colour direction are reviewed before production moves forward."],["Construction Checks","Panels, seams, structure and build details are checked against the approved brief."],["Stitching Checks","Stitching consistency, alignment and finishing quality are reviewed during production."],["Print / Embroidery Inspection","Decoration placement, colour, density and finish are checked against the artwork."],["Measurement Checks","Sizing and grading are measured against your size specification."],["Final Garment Review","Every finished piece is checked for defects, loose threads and cleanliness."],["Packing Audit","Labels, folding, polybags and carton counts are verified before export."]];
+async function signOutNow(){
+  /* end the session on the server if it still exists, then always clear it in this browser */
+  try{if(LIVE.sb)await Promise.race([LIVE.sb.auth.signOut({scope:"local"}),new Promise(r=>setTimeout(r,2500))])}catch(e){}
+  try{Object.keys(localStorage).filter(k=>k.startsWith("sb-")||k.includes("auth-token")).forEach(k=>localStorage.removeItem(k))}catch(e){}
+  try{sessionStorage.clear()}catch(e){}
+  session={admin:false,user:null};LIVE.uid=null;
+  location.replace("/account?signed-out=1");
+}
 function waNum(n){let d=String(n||"").replace(/\D/g,"");if(d.startsWith("00"))d=d.slice(2);else if(d.startsWith("0"))d="92"+d.slice(1);return d}
 const FLAG=cc=>cc.toUpperCase().replace(/./g,ch=>String.fromCodePoint(127397+ch.charCodeAt(0)));
 function qcVisual(i){const c=S.content,im=(c.qcImages||[])[i];return im?`<img src="${esc(im)}" alt="">`:`<div class="qc-ph"><img src="${garment(["jersey","jacket","hoodie","polo","vest","tracksuit","pack"][i%7],"#2a2a28","#F26A1B",["front","close","side","front","back","front","front"][i%7])}" alt=""></div>`}
@@ -440,12 +448,21 @@ function pgLegal(kind){
 
 /* ============ buyer panel ============ */
 const FLOW=["New","Reviewing","Quoted","Sample","Production","Shipped","Closed"];
+function accountNotice(){
+  if(typeof location==="undefined")return "";
+  const q=new URLSearchParams(location.search);
+  if(q.get("check-email"))return `<div class="notice ok"><b>Account created.</b> We sent a confirmation link to <b>${esc(q.get("check-email"))}</b>. Open your email, click the link, and you will come back here to log in. Check the spam folder if it does not arrive in a few minutes.</div>`;
+  if(q.get("confirmed"))return `<div class="notice ok"><b>Email confirmed.</b> Your account is ready. Log in below with your email and password.</div>`;
+  if(q.get("signed-out"))return `<div class="notice">You have been logged out.</div>`;
+  if(q.get("error_description")||(location.hash||"").includes("error"))return `<div class="notice bad"><b>This confirmation link has expired or was already used.</b> Try logging in. If that fails, create the account again to get a new link.</div>`;
+  return "";
+}
 function pgAccount(){
   const u=curUser();
   if(LIVE.uid&&!u) return phead("Buyer panel","Loading your account…")+`<section><div class="wrap"><div class="empty">Loading.</div></div></section>`;
   if(!u) return phead("Buyer panel","Track your quotes, manage your RFQ cart and saved products.")+
-  `<section><div class="wrap"><div class="grid g2" style="gap:24px">
-   <div class="panel"><h3 style="font-size:30px;margin-bottom:6px">Log in</h3><p class="muted" style="margin-bottom:14px">Track quotes and messages from ORRA.</p><form class="form" id="loginForm"><div class="field"><label for="l_email">Email</label><input id="l_email" type="email" value=""></div><div class="field"><label for="l_pass">Password</label><input id="l_pass" type="password"></div><p class="err" id="l_err"></p><button class="btn pri" type="submit">Log in</button></form></div>
+  `<section><div class="wrap">${accountNotice()}<div class="grid g2" style="gap:24px">
+   <div class="panel" id="loginPanel"><h3 style="font-size:30px;margin-bottom:6px">Log in</h3><p class="muted" style="margin-bottom:14px">Track quotes and messages from ORRA.</p><form class="form" id="loginForm"><div class="field"><label for="l_email">Email</label><input id="l_email" type="email" value=""></div><div class="field"><label for="l_pass">Password</label><input id="l_pass" type="password"></div><p class="err" id="l_err"></p><button class="btn pri" type="submit">Log in</button></form></div>
    <div class="panel"><h3 style="font-size:30px;margin-bottom:14px">Create account</h3><form class="form" id="regForm"><div class="f2"><div class="field"><label for="g_name">Full name</label><input id="g_name" required></div><div class="field"><label for="g_company">Company</label><input id="g_company"></div></div><div class="f2"><div class="field"><label for="g_email">Email</label><input id="g_email" type="email" required></div><div class="field"><label for="g_country">Country</label><input id="g_country"></div></div><div class="field"><label for="g_pass">Password (6+ characters)</label><input id="g_pass" type="password" required></div><p class="err" id="g_err"></p><button class="btn" type="submit">Create account</button></form></div>
   </div></div></section>`;
   const mine=S.rfqs.filter(r=>r.userId===u.id||(!LIVE.on&&r.email.toLowerCase()===(u.email||"").toLowerCase()));
@@ -628,7 +645,7 @@ document.addEventListener("click",e=>{
   switch(a){
    case"pwtoggle":{const i=el.parentNode.querySelector("input");const show=i.type==="password";i.type=show?"text":"password";el.innerHTML=show?EYE_OFF:EYE;el.setAttribute("aria-label",show?"Hide password":"Show password");i.focus();break}
    case"burger":$("#nav").classList.toggle("open");break;
-   case"signout":LIVE.sb&&LIVE.sb.auth.signOut().then(()=>{location.href="/"});break;
+   case"signout":signOutNow();break;
    case"xreset":confirmModal("This restores the original demo products, quotes and settings.",()=>{try{localStorage.removeItem(KEY)}catch(x){}load();session={admin:false,user:null};saveSess();toast("Demo data reset");go("home")});break;
    case"shopcat":e.preventDefault();go(id==="all"?"shop":"cat-"+id);break;
    case"shopsub":ui.shopSub=id;render();break;
@@ -713,7 +730,7 @@ document.addEventListener("submit",e=>{
   if(f.id==="loginForm"){if(!LIVE.sb){$("#l_err").textContent="Login is not configured yet.";return}$("#l_err").textContent="Signing in…";LIVE.sb.auth.signInWithPassword({email:v("l_email"),password:$("#l_pass").value}).then(({error})=>{if(error){$("#l_err").textContent=error.message;return}location.reload()});return}
   if(f.id==="regForm"){if(!v("g_name")||!/^\S+@\S+\.\S+$/.test(v("g_email"))||$("#g_pass").value.length<6){$("#g_err").textContent="Enter a name, a valid email and a 6+ character password.";return}if(!LIVE.sb){$("#g_err").textContent="Sign-up is not configured yet.";return}
    $("#g_err").textContent="Creating account…";const prof={name:v("g_name"),company:v("g_company"),country:v("g_country"),email:v("g_email")};
-   LIVE.sb.auth.signUp({email:v("g_email"),password:$("#g_pass").value,options:{data:prof}}).then(({data,error})=>{if(error){$("#g_err").textContent=error.message;return}if(!data.session){$("#g_err").style.color="var(--ok)";$("#g_err").textContent="Check your email to confirm your account, then log in.";return}location.reload()});return}
+   LIVE.sb.auth.signUp({email:v("g_email"),password:$("#g_pass").value,options:{data:prof,emailRedirectTo:location.origin+"/account?confirmed=1"}}).then(async({data,error})=>{if(error){$("#g_err").textContent=error.message;return}if(data.session){try{await LIVE.sb.auth.signOut({scope:"local"})}catch(e){}}location.replace("/account?check-email="+encodeURIComponent(prof.email))});return}
   if(f.id==="profForm"){const u=curUser();delete u._new;u.email=v("p_email")||u.email;u.name=v("p_name");u.company=v("p_company");u.country=v("p_country");u.phone=v("p_phone");if($("#p_pass")&&$("#p_pass").value)u.pass=$("#p_pass").value;session.user.name=u.name;saveSess();toast("Profile saved");render();return}
   if(f.id==="adminLogin"){if(!LIVE.sb){$("#a_err").textContent="Database is not configured yet.";return}LIVE.sb.auth.signInWithPassword({email:v("a_user"),password:$("#a_pass").value}).then(({error})=>{if(error){$("#a_err").textContent=error.message;return}location.reload()});return}
   if(f.id==="prodForm"){
@@ -812,7 +829,8 @@ if(typeof document!=="undefined"){
     setRoute(routeOf(location.pathname));
     if(B.url&&B.key&&window.supabase){
       LIVE.sb=window.supabase.createClient(B.url,B.key);
-      const {data:{session:ss}}=await LIVE.sb.auth.getSession();
+      let {data:{session:ss}}=await LIVE.sb.auth.getSession();
+      if(/[?&]confirmed=1/.test(location.search)){if(ss){try{await LIVE.sb.auth.signOut({scope:"local"})}catch(e){}}ss=null;if(location.hash)history.replaceState({},"",location.pathname+location.search)}
       if(ss){
         LIVE.uid=ss.user.id;
         const {data:adm}=await LIVE.sb.from("admins").select("user_id").eq("user_id",ss.user.id).maybeSingle();

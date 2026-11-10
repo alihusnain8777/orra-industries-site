@@ -1,5 +1,10 @@
 // Renders every page of the site on the server so Google sees full HTML.
 const engine = require("../public/app.js");
+const crypto = require("crypto"), fs = require("fs"), path = require("path");
+// A new version tag on every deploy, so browsers always load the latest app.js / styles.css
+let VER = process.env.VERCEL_GIT_COMMIT_SHA || process.env.VERCEL_DEPLOYMENT_ID || "";
+try { VER = VER || crypto.createHash("md5").update(fs.readFileSync(path.join(__dirname, "../public/app.js"))).digest("hex"); } catch (e) {}
+VER = (VER || String(Date.now())).slice(0, 10);
 
 const SB_URL = process.env.SUPABASE_URL || "https://xqwqkeyhaeinlixswcnn.supabase.co";
 // Public (anon) key: safe to ship, the database security rules protect private data.
@@ -60,16 +65,16 @@ ${VERIFY ? `<meta name="google-site-verification" content="${esc(VERIFY)}">` : "
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,600;0,700;0,800;1,800;1,900&family=Barlow+Condensed:wght@500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/styles.css?v=${VER}">
 ${ld.map((x) => `<script type="application/ld+json">${safeJson(x)}</script>`).join("")}
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script defer src="/app.js"></script>
+<script defer src="/app.js?v=${VER}"></script>
 </head><body>
 <div id="app">${html}</div><div id="modal-root"></div>
 <script>window.__BOOT__=${safeJson({ rows, url: SB_URL, key: SB_KEY })}</script>
 </body></html>`;
   res.statusCode = m.exists ? 200 : 404;
   res.setHeader("Content-Type", "text/html; charset=utf-8");
-  res.setHeader("Cache-Control", "s-maxage=60, stale-while-revalidate=600");
+  res.setHeader("Cache-Control", "public, max-age=0, s-maxage=60, stale-while-revalidate=300");
   res.end(page);
 };

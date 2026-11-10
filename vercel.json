@@ -2,6 +2,7 @@
   "buildCommand": "",
   "outputDirectory": "public",
   "routes": [
+    { "src": "/(app\\.js|styles\\.css)", "headers": { "cache-control": "public, max-age=0, must-revalidate" }, "continue": true },
     { "handle": "filesystem" },
     { "src": "/(.*)", "dest": "/api/render?p=/$1" }
   ]

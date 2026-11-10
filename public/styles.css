@@ -719,3 +719,6 @@ header.site2 nav.main>a,header.site2 .dd>a{padding-top:8px;padding-bottom:8px}
  header.site2 .ddm>a{grid-column:1/-1;border:0!important;width:auto!important}
 }
 @media (max-width:600px){.acct-btn{padding:8px 10px}.acct-btn span{display:none}}
+.notice{border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:14px 16px;margin-bottom:20px;font-size:14px;line-height:1.55}
+.notice.ok{border-color:color-mix(in srgb,var(--ok) 50%,transparent);background:color-mix(in srgb,var(--ok) 10%,var(--surface))}
+.notice.bad{border-color:color-mix(in srgb,var(--bad) 50%,transparent);background:color-mix(in srgb,var(--bad) 8%,var(--surface))}
