@@ -731,3 +731,5 @@ header.site2 nav.main>a,header.site2 .dd>a{padding-top:8px;padding-bottom:8px}
 .forgot-box[hidden]{display:none}
 .f-row{display:flex;gap:8px;flex-wrap:wrap}
 .f-row input{flex:1 1 180px;min-width:0;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:9px 12px;color:var(--fg)}
+.auth-one{max-width:520px;margin:0 auto}
+.switch-acct{margin-top:18px;padding-top:16px;border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:14px;color:var(--muted)}
