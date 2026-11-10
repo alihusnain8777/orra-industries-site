@@ -211,6 +211,8 @@ function waNum(n){let d=String(n||"").replace(/\D/g,"");if(d.startsWith("00"))d=
 const FLAG=cc=>cc.toUpperCase().replace(/./g,ch=>String.fromCodePoint(127397+ch.charCodeAt(0)));
 function qcVisual(i){const c=S.content,im=(c.qcImages||[])[i];return im?`<img src="${esc(im)}" alt="">`:`<div class="qc-ph"><img src="${garment(["jersey","jacket","hoodie","polo","vest","tracksuit","pack"][i%7],"#2a2a28","#F26A1B",["front","close","side","front","back","front","front"][i%7])}" alt=""></div>`}
 const numWord=n=>["Zero","One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Eleven","Twelve"][n]||String(n);
+function heroLines(sents){const out=[];sents.forEach((s,i)=>{const w=s.split(" ");if(i>0&&w.length>2){out.push({t:w.slice(0,-1).join(" "),em:i===1});out.push({t:w[w.length-1],em:i===1})}else out.push({t:s,em:i===1})});return out}
+function countUp(){if(typeof document==="undefined")return;const els=document.querySelectorAll(".h-stats .cnt");if(!els.length)return;if(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches)return;const t0=performance.now(),D=1400;els.forEach(e=>e.textContent="0");(function step(t){const k=Math.min(1,(t-t0)/D),ease=1-Math.pow(1-k,3);els.forEach(e=>{e.textContent=Math.round(+e.dataset.to*ease)});if(k<1)requestAnimationFrame(step)})(t0)}
 function pgHome(){
   const c=S.content, s=S.settings, feat=S.products.filter(p=>p.featured&&p.active).slice(0,4);
   const kits=[S.products[0],S.products.find(p=>p.type==="hoodie"),S.products.find(p=>p.type==="puffer")].filter(Boolean);
@@ -226,9 +228,9 @@ function pgHome(){
   <section class="h-intro"><div class="wrap">
    <div class="dot-eyebrow">Sialkot, Pakistan — International apparel manufacturing</div>
    ${s.since?`<span class="cred-chip"><b>Since ${esc(s.since)}</b> · Manufacturing credentials</span>`:`<span class="cred-chip"><b>Export ready</b> · Manufacturing credentials</span>`}
-   <h1 class="h-display">${words.map((w,i)=>i===1?`<em>${esc(w)}</em>`:esc(w)).join("<br>")}</h1>
+   <h1 class="h-display">${heroLines(words).map((l,i)=>`<span class="hl ${i%2?"from-r":"from-l"}" style="animation-delay:${.1+i*.18}s">${l.em?`<em>${esc(l.t)}</em>`:esc(l.t)}</span>`).join("")}</h1>
    <div class="h-tag">Sampling 7–10 working days</div>
-   <div class="h-stats"><div><span>MOQ</span><b>50<small>pcs</small></b><i>Minimum pieces</i></div><div><span>Sample time</span><b>7–10<small>days</small></b><i>Working days</i></div><div><span>Bulk time</span><b>27–30<small>days</small></b><i>Working days</i></div></div>
+   <div class="h-stats"><div><span>MOQ</span><b><i class="cnt" data-to="50">50</i><small>pcs</small></b><i>Minimum pieces</i></div><div><span>Sample time</span><b><i class="cnt" data-to="7">7</i>–<i class="cnt" data-to="10">10</i><small>days</small></b><i>Working days</i></div><div><span>Bulk time</span><b><i class="cnt" data-to="27">27</i>–<i class="cnt" data-to="30">30</i><small>days</small></b><i>Working days</i></div></div>
    <p class="h-lead">${esc(c.heroSub)}</p>
    <div class="h-ctas"><a class="pill-btn" href="#rfq">Start your production brief →</a><a class="text-btn" href="#shop">Explore products →</a></div>
   </div></section>
@@ -611,7 +613,7 @@ function pageHTML(){
 }
 const EYE='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>',EYE_OFF='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3l18 18M10.6 5.1A10 10 0 0 1 12 5c6.5 0 10 7 10 7a17 17 0 0 1-3.3 4.2M6.6 6.6A17 17 0 0 0 2 12s3.5 7 10 7a10 10 0 0 0 4.4-1"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>';
 function addPwToggles(){document.querySelectorAll('input[type="password"]:not([data-pw])').forEach(inp=>{inp.dataset.pw="1";const w=document.createElement("span");w.className="pw-wrap";inp.parentNode.insertBefore(w,inp);w.appendChild(inp);const b=document.createElement("button");b.type="button";b.className="pw-eye";b.dataset.act="pwtoggle";b.setAttribute("aria-label","Show password");b.innerHTML=EYE;w.appendChild(b)})}
-function render(){$("#app").innerHTML=pageHTML();addPwToggles();drawChat();document.title=titleOf(route);save()}
+function render(){$("#app").innerHTML=pageHTML();addPwToggles();drawChat();if(route==="home")countUp();document.title=titleOf(route);save()}
 function titleOf(r){const s=S.settings;if(r==="home")return s.metaTitle;if(r.startsWith("product-")){const p=prod(r.slice(8));return p?p.name+" | "+s.company:s.company}if(r.startsWith("post-")){const p=S.posts.find(x=>x.id===r.slice(5));return p?p.title+" | "+s.company:s.company}if(r.startsWith("cat-")){const c=catOf(r.slice(4));return c?"Custom "+c.name+" Manufacturer | "+s.company:s.company}const t={shop:"Product Catalogue","private-label":"Private Label Clothing Manufacturer",manufacturing:"Manufacturing Process",markets:"Export Markets",about:"About Us",blog:"Knowledge Center",contact:"Contact",rfq:"Request a Quote",cart:"RFQ Cart","privacy-policy":"Privacy Policy",terms:"Terms of Business",faq:"FAQ",account:"Buyer Account",admin:"Admin"}[r];return (t||"Page not found")+" | "+s.company}
 function descOf(r){const s=S.settings;if(r.startsWith("product-")){const p=prod(r.slice(8));if(p)return p.desc+" MOQ "+p.moq+" pcs, sample in "+p.sample+" working days. Made in Sialkot by "+s.company+"."}if(r.startsWith("post-")){const p=S.posts.find(x=>x.id===r.slice(5));if(p)return p.body.split("\n")[0].slice(0,155)}if(r.startsWith("cat-")){const c=catOf(r.slice(4));if(c)return c.blurb+" MOQ 50 pieces. Made in Sialkot, Pakistan."}return s.metaDesc}
 
