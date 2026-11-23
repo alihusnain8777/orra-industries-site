@@ -501,7 +501,7 @@ function pgAdmin(){
   if(LIVE.uid&&!session.admin) return phead("Admin panel","This account does not have staff access.")+`<section><div class="wrap"><button class="btn" data-act="signout">Sign out</button></div></section>`;
   if(!session.admin) return phead("Admin panel","Restricted area for ORRA staff.")+`<section><div class="wrap"><div class="panel" style="max-width:420px"><h3 style="font-size:30px;margin-bottom:6px">Admin login</h3><p class="muted" style="margin-bottom:14px">Sign in with your staff email.</p><form class="form" id="adminLogin"><div class="field"><label for="a_user">Email</label><input id="a_user" type="email" autocomplete="username"></div><div class="field"><label for="a_pass">Password</label><input id="a_pass" type="password" autocomplete="current-password"></div><p class="err" id="a_err"></p><button class="btn pri" type="submit">Log in</button></form><p style="margin-top:4px"><a href="#" data-act="forgot" class="forgot-link">Forgot password?</a></p><div id="forgotBox" class="forgot-box" hidden><p class="muted" style="font-size:13px">Enter your account email. We will send a link to set a new password.</p><div class="f-row"><input id="f_email" type="email" placeholder="you@company.com" autocomplete="email"><button type="button" class="btn sm pri" data-act="sendreset">Send reset link</button></div><p class="err" id="f_err"></p></div></div></div></section>`;
   const t=ui.adminTab; const unread=S.messages.filter(m=>m.status==="Unread").length; const newR=S.rfqs.filter(r=>r.status==="New").length;
-  const nav=[["sep","Overview"],["dashboard","Dashboard"],["sep","Sales"],["rfqs","Quotes & RFQs",newR],["messages","Messages",unread],["buyers","Buyers",S.users.length],["sep","Catalogue"],["products","Products",S.products.length],["categories","Categories",S.categories.length],["media","Media library",S.media.length],["sep","Content"],["content","Homepage & pages"],["blog","Knowledge Center",S.posts.length],["testimonials","Testimonials",S.testimonials.length],["sep","System"],["settings","Settings & SEO"],["activity","Activity log"]];
+  const nav=[["sep","Overview"],["dashboard","Dashboard"],["sep","Sales"],["rfqs","Quotes & RFQs",newR],["messages","Messages",unread],["buyers","Buyers",S.users.length],["sep","Catalogue"],["products","Products",S.products.length],["categories","Categories",S.categories.length],["media","Media library",S.media.length],["sep","Content"],["content","Homepage & pages"],["blog","Knowledge Center",S.posts.length],["testimonials","Testimonials",S.testimonials.length],["sep","System"],["staff","Staff & admins"],["settings","Settings & SEO"],["activity","Activity log"]];
   return `<div class="app"><aside class="side"><div class="who"><b style="font-family:var(--display);font-size:22px;text-transform:uppercase">ORRA Admin</b><div class="mono" style="color:#A9A89F">Signed in as admin</div></div>${nav.map(n=>n[0]==="sep"?`<div class="sep">${n[1]}</div>`:`<button class="${t===n[0]?"on":""}" data-act="atab" data-t="${n[0]}">${n[1]}${n[2]?`<span class="ct">${n[2]}</span>`:""}</button>`).join("")}<button data-act="signout" style="margin-top:18px">Log out</button></aside><div class="main">${(A[t]||A.dashboard)()}</div></div>`;
 }
 const A={
@@ -567,6 +567,12 @@ const A={
   <div class="panel form"><h3 style="font-size:24px">SEO</h3>${f("metaTitle","Homepage title (≤ 60 characters)")}<div class="field"><label for="st_metaDesc">Meta description</label><textarea id="st_metaDesc" data-st="metaDesc">${esc(s.metaDesc)}</textarea></div><p class="mono muted" id="seoHint">${s.metaTitle.length} / 60 characters in title</p></div>
   <div class="panel form"><h3 style="font-size:24px">Store options</h3><label class="switch"><input type="checkbox" id="st_showPrices" ${s.showPrices?"checked":""}> Show indicative prices on product pages</label></div>
   <div><button class="btn pri" type="submit">Save settings</button></div></form>`;
+ },
+ staff(){
+  setTimeout(loadStaff,0);
+  return `<h2>Staff &amp; admins</h2><p class="muted" style="max-width:640px">People on this list can open the Admin Panel and change products, prices, content and quotes. Add only people you trust.</p>
+  <form class="panel form" id="staffForm" style="max-width:560px;margin-top:18px"><div class="field"><label for="st_new">Email address</label><div class="f-row"><input id="st_new" type="email" placeholder="name@company.com" autocomplete="off" required><button class="btn pri" type="submit">Make admin</button></div></div><p class="muted" style="font-size:13px">If this person already has an account, they become admin right away. If not, they become admin automatically once they create an account with this email and confirm it.</p><p class="err" id="st_err"></p></form>
+  <h3 style="font-size:24px;margin:28px 0 10px">Current staff</h3><div id="staffList"><div class="empty">Loading…</div></div>`;
  },
  activity(){
   return `<h2>Activity log</h2><div class="log" style="margin-top:16px">${S.log.map(l=>`<div><time>${fmt(l.t)}</time><span><b>${esc(l.who)}</b> · ${esc(l.what)}</span></div>`).join("")||'<div class="empty">No activity yet.</div>'}</div>`;
@@ -987,4 +993,33 @@ if(typeof document!=="undefined"){
   },true);
   function setCat(dd,c){dd.querySelectorAll(".ddc.on").forEach(x=>{x.classList.remove("on");x.querySelector(".ddc-btn").setAttribute("aria-expanded","false")});c.classList.add("on");c.querySelector(".ddc-btn").setAttribute("aria-expanded","true")}
   document.addEventListener("keydown",e=>{if(e.key==="Escape")closeMenu()});
+}
+
+/* staff & admins (admin panel) */
+async function loadStaff(){
+  const box=document.getElementById("staffList");if(!box||!LIVE.sb)return;
+  const {data,error}=await LIVE.sb.rpc("staff_list");
+  if(error){box.innerHTML=`<div class="empty">Could not load staff: ${esc(error.message)}</div>`;return}
+  const me=(session.user&&curUser()&&curUser().email||"").toLowerCase();
+  box.innerHTML=`<div class="tbl-wrap"><table class="t"><thead><tr><th>Email</th><th>Status</th><th>Since</th><th></th></tr></thead><tbody>${(data||[]).map(r=>`<tr><td><b>${esc(r.email)}</b>${r.email.toLowerCase()===me?' <span class="mono muted">(you)</span>':""}</td><td><span class="pill ${r.status==="admin"?"s-shipped":"s-reviewing"}">${r.status==="admin"?"Admin":"Waiting for sign-up"}</span></td><td class="mono">${fdate(r.since)}</td><td>${r.email.toLowerCase()===me?"":`<button class="btn sm danger" data-staffrm="${esc(r.email)}">Remove</button>`}</td></tr>`).join("")}</tbody></table></div>`;
+}
+if(typeof document!=="undefined"){
+  document.addEventListener("submit",async e=>{if(e.target.id!=="staffForm")return;e.preventDefault();e.stopPropagation();
+    const inp=document.getElementById("st_new"),er=document.getElementById("st_err"),em=inp.value.trim();
+    if(!/^\S+@\S+\.\S+$/.test(em)){er.style.color="";er.textContent="Enter a valid email address.";return}
+    er.style.color="var(--muted)";er.textContent="Saving…";
+    const {data,error}=await LIVE.sb.rpc("staff_add",{p_email:em});
+    if(error){er.style.color="";er.textContent="Could not add: "+error.message;return}
+    er.style.color="var(--ok)";er.textContent=data==="added"?em+" is now an admin.":data==="invited"?em+" will become admin after creating an account and confirming the email.":"Enter a valid email address.";
+    if(data!=="invalid"){inp.value="";log("Added staff "+em);save();loadStaff()}
+  },true);
+  document.addEventListener("click",e=>{const b=e.target.closest("[data-staffrm]");if(!b)return;const em=b.dataset.staffrm;
+    confirmModal("Remove admin access for "+esc(em)+"? They keep their buyer account.",async()=>{
+      const {data,error}=await LIVE.sb.rpc("staff_remove",{p_email:em});
+      if(error){toast("Could not remove: "+error.message);return}
+      toast(data==="last"?"You can't remove the last admin.":data==="self"?"You can't remove yourself.":em+" removed from staff.");
+      if(data==="removed"){log("Removed staff "+em);save()}
+      loadStaff();
+    });
+  });
 }

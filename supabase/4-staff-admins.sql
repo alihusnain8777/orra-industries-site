@@ -1,0 +1,3 @@
+-- Already applied to the live database by Claude. Kept here for reference.
+-- Adds: admin_invites table, staff_list / staff_add / staff_remove functions,
+-- and a trigger that makes an invited email admin once it confirms its account.
